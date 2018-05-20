@@ -9,20 +9,23 @@
       //Memory
       //Audio - NOT INITIALLY IMPLEMENTING
       //File I/O - NOT INITIALLY IMPLEMENTING
-      //Threading - NOT INITIALLY IMPLEMENTING
+      //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Memory buffer
-      //Replace having to use new and delete
-      //Allocate memory once, delete at the end
-      
+//TODO: Rectangle which can be moved
+      //Give positions in pixels
+      //Project matrix
+
 const char vShader[] =
 "#version 410 core\n"
-"layout (location = 0) in vec2 position;\n"
+"layout (location = 0) in vec2 modelPosition;\n"
 "layout (location = 1) in vec3 inColour;\n"
 "out vec3 colour;\n"
+"uniform mat4 projection;\n"
+"uniform vec2 position;\n"
 "void main()\n"
 "{\n"
-"gl_Position = vec4(position, 0.0f, 1.0f);\n"
+"vec2 actualPosition = modelPosition + position;\n"
+"gl_Position = projection * vec4(actualPosition, 0.0f, 1.0f);\n"
 "colour = inColour;\n"
 "}\0";
 
@@ -36,7 +39,6 @@ const char fShader[] =
 "}\0";
 
 
-
 int main(int argc, char** argv)
 {
   Platform* platform = initPlatform();
@@ -44,9 +46,11 @@ int main(int argc, char** argv)
   float black[] = {0.0f, 0.0f, 0.0f};
   setWindowClearColour(platform, black);
 
-  GLuint shader = loadShader(vShader, fShader);
-  Drawable rect = loadRect();
-  Drawable line = loadLine();
+  uint shader = loadShader(vShader, fShader);
+  Drawable rect = loadRect(20.0f, 100.0f);
+  Vec2f rectPosition = {50.0f, 270.0f};
+
+  setProjectionMatrix(platform, shader);
 
   bool running = true;
 
@@ -58,12 +62,21 @@ int main(int argc, char** argv)
     else
     {
       clearWindow(platform);
+      if(isKeyPressed(platform, Key::W))
+      {
+        rectPosition.y -= 5.0f;
+        if(rectPosition.y < 0.0f) rectPosition.y = 0.0f;
+      }
+      if(isKeyPressed(platform, Key::S))
+      {
+        rectPosition.y += 5.0f;
+        if(rectPosition.y > 540.0f - 100.0f) rectPosition.y = 540.0f - 100.0f;
+      }
 
-      glUseProgram(shader);
+      setVec2Uniform(shader, "position", rectPosition);
+      useShader(shader);
       draw(rect);
-      draw(line);
 
-      if(isKeyPressed(platform, Key::W)) printf("KEY W PRESSED\n");
       updateWindow(platform);
     }
   }

@@ -6,7 +6,6 @@ Platform* initPlatform()
   MemBuffer* memBuffer = initMemory(bytesToAllocate);
 
   Platform* platform = (Platform*)allocate(memBuffer, sizeof(Platform));
-  //printf("Platform at %p\n", platform);
   platform->memBuffer = memBuffer;
   platform->window = initWindow(platform);
   platform->keyboard = initKeyboard(platform);
@@ -156,7 +155,7 @@ GLuint linkShader(GLuint vShaderID, GLuint fShaderID)
   return shader;
 }
 
-GLuint loadShader(const char* vShader, const char* fShader)
+uint loadShader(const char* vShader, const char* fShader)
 {
   GLuint vShaderID = compileShader(vShader, GL_VERTEX_SHADER);
   GLuint fShaderID = compileShader(fShader, GL_FRAGMENT_SHADER);
@@ -166,7 +165,7 @@ GLuint loadShader(const char* vShader, const char* fShader)
 
   glDeleteShader(vShaderID);
   glDeleteShader(fShaderID);
-  return shader;
+  return (uint)shader;
 }
 
 GLuint bufferVertexData(GLfloat*  positions,  GLsizei positionBufferSize,
@@ -191,14 +190,14 @@ GLuint bufferVertexData(GLfloat*  positions,  GLsizei positionBufferSize,
   return VAO;
 }
 
-Drawable loadRect()
+Drawable loadRect(float width, float height)
 {
     GLfloat positions[] =
     {
-      -0.5f, 0.5f,
-       0.5f, 0.5f,
-       0.5f, -0.5f,
-      -0.5f, -0.5f
+      0.0f, 0.0f,
+      width, 0.0f,
+      width, height,
+      0.0f, height
     };
 
     GLfloat colours[] =
@@ -247,4 +246,40 @@ void draw(Drawable d)
 {
   glBindVertexArray(d.vao);
   glDrawElements(d.drawMode, d.indexCount, GL_UNSIGNED_INT, 0);
+}
+
+void useShader(uint shader)
+{
+  glUseProgram((GLuint)shader);
+}
+
+GLint uniformLocation(GLuint shader,
+                      const char* uniformName)
+{
+  return glGetUniformLocation(shader, uniformName);
+}
+
+void setMat4Uniform(GLuint shader, const char* uniform, glm::mat4 value)
+{
+  glUseProgram(shader);
+  GLint location = uniformLocation(shader, uniform);
+  glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
+  assert(glGetError() == GL_NO_ERROR);
+}
+
+void setProjectionMatrix(Platform* platform, uint shader)
+{
+  float screenWidth = platform->window->getWidth();
+  float screenHeight = platform->window->getHeight();
+
+  glm::mat4 projection = glm::ortho(0.0f, screenWidth, screenHeight, 0.0f);
+  setMat4Uniform((GLuint)shader, "projection", projection);
+}
+
+void setVec2Uniform(uint shader, const char* uniform, Vec2f value)
+{
+  glUseProgram((GLuint)shader);
+  GLint location = uniformLocation(shader, uniform);
+  glUniform2f(location, value.x, value.y);
+  assert(glGetError() == GL_NO_ERROR);
 }

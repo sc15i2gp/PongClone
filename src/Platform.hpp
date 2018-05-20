@@ -1,6 +1,9 @@
 #pragma once
 #include <assert.h>
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include "SFML_Window.hpp"
+#include "Vector.hpp"
 
 #define Bytes(n) n
 #define Kilobytes(n) (1024*Bytes(n))
@@ -48,17 +51,23 @@ void destroyPlatform(Platform* platform);
 
 
 
+
 /**     Memory      **/
 
 MemBuffer* initMemory(uint memSize);
 byte* allocate(Platform* platform, uint size);
 byte* allocate(MemBuffer* memBuffer, uint size);
 
+
+
+
+
 /**     Input     **/
 
 Keyboard* initKeyboard(Platform* platform);
 void pollInput(Platform* platform);
 bool isKeyPressed(Platform* platform, Key key);
+
 
 
 
@@ -72,11 +81,15 @@ void clearWindow(Platform* platform);
 void updateWindow(Platform* platform);
 
 
+
+
+
 /**     Graphics      **/
 
-
-
-GLuint loadShader(const char* vShader, const char* fShader);
-Drawable loadRect();
+uint loadShader(const char* vShader, const char* fShader);
+Drawable loadRect(float width, float height);
 Drawable loadLine();
 void draw(Drawable d);
+void useShader(uint shader);
+void setProjectionMatrix(Platform* platform, uint shader);
+void setVec2Uniform(uint shader, const char* uniform, Vec2f value);
