@@ -18,6 +18,11 @@
       //Buffer vertex data
       //Draw vertex data
 
+struct Drawable
+{
+  GLuint vao;
+  GLsizei indexCount;
+};
 
 const char vShader[] =
 "#version 410 core\n"
@@ -82,7 +87,7 @@ GLuint loadShader()
   assert(vShaderID && fShaderID);
 
   GLuint shader = linkShader(vShaderID, fShaderID);
-  
+
   glDeleteShader(vShaderID);
   glDeleteShader(fShaderID);
   return shader;
@@ -110,7 +115,7 @@ GLuint bufferVertexData(GLfloat*  positions,  GLsizei positionBufferSize,
   return VAO;
 }
 
-GLuint loadRect()
+Drawable loadRect()
 {
     GLfloat positions[] =
     {
@@ -131,7 +136,41 @@ GLuint loadRect()
     GLsizei positionBufferSize = sizeof(positions);
     GLsizei colourBufferSize = sizeof(colours);
     GLsizei indexBufferSize = sizeof(indices);
-    return bufferVertexData(positions, positionBufferSize, colours, colourBufferSize, indices, indexBufferSize);
+    GLuint vao = bufferVertexData(positions, positionBufferSize, colours, colourBufferSize,
+                                  indices, indexBufferSize);
+    GLsizei indexCount = 6;
+    Drawable rect = {vao, indexCount};
+    return rect;
+}
+
+Drawable loadLine()
+{
+  GLfloat positions[] =
+  {
+    0.75f, 0.75f,
+    0.75f, -0.75f
+  };
+
+  GLfloat colours[] =
+  {
+    1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f
+  };
+  GLuint indices[] = {0, 1};
+  GLsizei positionBufferSize = sizeof(positions);
+  GLsizei colourBufferSize = sizeof(colours);
+  GLsizei indexBufferSize = sizeof(indices);
+  GLuint vao = bufferVertexData(positions, positionBufferSize, colours, colourBufferSize,
+                                indices, indexBufferSize);
+  GLsizei indexCount = 2;
+  Drawable line = {vao, indexCount};
+  return line;
+}
+
+void draw(Drawable d, GLenum drawMode)
+{
+  glBindVertexArray(d.vao);
+  glDrawElements(drawMode, d.indexCount, GL_UNSIGNED_INT, 0);
 }
 
 int main(int argc, char** argv)
@@ -144,7 +183,9 @@ int main(int argc, char** argv)
   window.setClearColour(black);
 
   GLuint shader = loadShader();
-  GLuint rect = loadRect();
+  Drawable rect = loadRect();
+  Drawable line = loadLine();
+
   sf::Event e;
   bool running = true;
 
@@ -165,8 +206,8 @@ int main(int argc, char** argv)
     {
       window.clear();
       glUseProgram(shader);
-      glBindVertexArray(rect);
-      glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+      draw(rect, GL_TRIANGLES);
+      draw(line, GL_LINES);
       window.update();
     }
   }
