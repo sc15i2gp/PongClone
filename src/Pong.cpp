@@ -59,6 +59,21 @@ void setScreenPosition(GameState* gameState, Vec2f position, Vec2f size)
   setVec2Uniform(gameState->shader, "position", position);
 }
 
+void updatePaddle(Entity& entity)
+{
+  entity.position += entity.velocity;
+  if(entity.position.y < 0.0f + 0.5f*entity.size.y)
+  {
+    entity.position.y = 0.0f + 0.5f*entity.size.y;
+  }
+  else if(entity.position.y > 540.0f - 0.5f*entity.size.y)
+  {
+    entity.position.y = 540.0f - 0.5f*entity.size.y;
+  }
+
+  entity.velocity.y = 0.0f;
+}
+
 void gameUpdate(Platform* platform, GameState* gameState)
 {
   if(isKeyPressed(platform, Key::W))
@@ -70,18 +85,8 @@ void gameUpdate(Platform* platform, GameState* gameState)
     gameState->paddle1Entity.velocity.y = 5.0f;
   }
 
-  //Update paddle and ball similarities
-  //Position += velocity
-  //Screen bounds check
-
-  //Update paddle 1
-  //Update paddle needs position, velocity, size
-  gameState->paddle1Entity.position += gameState->paddle1Entity.velocity;
-  if(gameState->paddle1Entity.position.y < 0.0f) gameState->paddle1Entity.position.y = 0.0f;
-  else if(gameState->paddle1Entity.position.y > 540.0f - 100.0f) gameState->paddle1Entity.position.y = 540.0f - 100.0f;
-  gameState->paddle1Entity.velocity.y = 0.0f;
-
-  //Update paddle 2
+  updatePaddle(gameState->paddle1Entity);
+  updatePaddle(gameState->paddle2Entity);
 
   //Update ball
   useShader(gameState->shader);
