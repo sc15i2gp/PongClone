@@ -2,12 +2,16 @@
 #include <assert.h>
 #include "SFML_Window.hpp"
 
+#define Bytes(n) n
+#define Kilobytes(n) (1024*Bytes(n))
+
 typedef sf::Keyboard::Key Key;
 
 struct Keyboard
 {
   bool isPressed[Key::KeyCount];
 };
+
 
 struct Drawable
 {
@@ -17,9 +21,17 @@ struct Drawable
 };
 
 
+struct MemBuffer
+{
+  uint bufferSize = 0;
+  uint inUse = 0;
+  byte* buffer = NULL;
+};
+
 
 struct Platform
 {
+  MemBuffer* memBuffer;
   SFML_Window* window;
   Keyboard* keyboard;
 };
@@ -35,9 +47,16 @@ void destroyPlatform(Platform* platform);
 
 
 
+
+/**     Memory      **/
+
+MemBuffer* initMemory(uint memSize);
+byte* allocate(Platform* platform, uint size);
+byte* allocate(MemBuffer* memBuffer, uint size);
+
 /**     Input     **/
 
-Keyboard* initKeyboard();
+Keyboard* initKeyboard(Platform* platform);
 void pollInput(Platform* platform);
 bool isKeyPressed(Platform* platform, Key key);
 
@@ -46,7 +65,7 @@ bool isKeyPressed(Platform* platform, Key key);
 
 /**     window      **/
 
-SFML_Window* initWindow();
+SFML_Window* initWindow(Platform* platform);
 void setWindowClearColour(Platform* platform, float colour[3]);
 bool shouldWindowClose(Platform* platform);
 void clearWindow(Platform* platform);

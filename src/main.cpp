@@ -11,6 +11,10 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING
 
+//TODO: Memory buffer
+      //Replace having to use new and delete
+      //Allocate memory once, delete at the end
+      
 const char vShader[] =
 "#version 410 core\n"
 "layout (location = 0) in vec2 position;\n"

@@ -2,18 +2,61 @@
 
 Platform* initPlatform()
 {
-  Platform* platform = new Platform;
-  platform->window = initWindow();
-  platform->keyboard = initKeyboard();
+  uint bytesToAllocate = Kilobytes(4);
+  MemBuffer* memBuffer = initMemory(bytesToAllocate);
+
+  Platform* platform = (Platform*)allocate(memBuffer, sizeof(Platform));
+  //printf("Platform at %p\n", platform);
+  platform->memBuffer = memBuffer;
+  platform->window = initWindow(platform);
+  platform->keyboard = initKeyboard(platform);
+  return platform;
 }
 
 void destroyPlatform(Platform* platform)
 {
+  MemBuffer* memBuffer = platform->memBuffer;
+  delete[] memBuffer;
 }
 
-Keyboard* initKeyboard()
+void printMemBuffer(MemBuffer* buffer)
 {
-  Keyboard* keyboard = new Keyboard;
+  printf("MEMBUFFER\n");
+  printf("Location: %p\n", buffer);
+  printf("Size: %d\n", buffer->bufferSize);
+  printf("Bytes in use: %d\n", buffer->inUse);
+  printf("Buffer: %p\n", buffer->buffer);
+  printf("Next alloc location: %p\n", buffer->buffer + buffer->inUse);
+}
+
+MemBuffer* initMemory(uint memSize)
+{
+  byte* buffer = new byte[memSize];
+  MemBuffer* memBuffer = new (buffer) MemBuffer;
+  memBuffer->bufferSize = Kilobytes(4) - (2*sizeof(uint));
+  memBuffer->inUse = 0;
+  memBuffer->buffer = buffer + sizeof(MemBuffer);
+  //printMemBuffer(memBuffer);
+  return memBuffer;
+}
+
+byte* allocate(MemBuffer* memBuffer, uint size)
+{
+  assert(memBuffer->inUse + size <= memBuffer->bufferSize && "Attempted to allocate beyond buffer");
+  byte* ptr = memBuffer->buffer + memBuffer->inUse;
+  memBuffer->inUse += size;
+  return ptr;
+}
+
+byte* allocate(Platform* platform, uint size)
+{
+  MemBuffer* memBuffer = platform->memBuffer;
+  return allocate(memBuffer, size);
+}
+
+Keyboard* initKeyboard(Platform* platform)
+{
+  Keyboard* keyboard = (Keyboard*)allocate(platform, sizeof(Keyboard));
   for(uint i = 0; i < Key::KeyCount; i++)
   {
     keyboard->isPressed[i] = false;
@@ -47,11 +90,12 @@ bool isKeyPressed(Platform* platform, Key key)
   return platform->keyboard->isPressed[key];
 }
 
-SFML_Window* initWindow()
+SFML_Window* initWindow(Platform* platform)
 {
-  SFML_Window* window = new SFML_Window(960, 540, "Pong");
-  byte* windowBuffer = new byte[sizeof(sf::Window)];
-  window->init(windowBuffer);
+  byte* windowBuffer = allocate(platform, sizeof(SFML_Window));
+  SFML_Window* window = new (windowBuffer) SFML_Window(960, 540, "Pong");
+  byte* sfWindowBuffer = allocate(platform, sizeof(sf::Window));
+  window->init(sfWindowBuffer);
   LibInit::initGLEW();
   return window;
 }
