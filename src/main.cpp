@@ -12,7 +12,7 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Have positions be center of rectangles
+//TODO: Velocity for paddles + ball
 
 int main(int argc, char** argv)
 {

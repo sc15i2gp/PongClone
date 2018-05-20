@@ -2,13 +2,19 @@
 #include "Platform.hpp"
 #include "Vector.hpp"
 
+//Paddle or ball
+struct Entity
+{
+  Vec2f size;
+  Vec2f velocity;
+  Vec2f position;
+};
+
 struct GameState
 {
-  Vec2f paddleSize;
-  Vec2f ballSize;
-  Vec2f paddle1Position;
-  Vec2f paddle2Position;
-  Vec2f ballPosition;
+  Entity paddle1Entity;
+  Entity paddle2Entity;
+  Entity ballEntity;
   Drawable paddle1;
   Drawable paddle2;
   Drawable ball;

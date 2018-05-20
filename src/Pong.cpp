@@ -23,20 +23,32 @@ const char fShader[] =
 "fragColour = vec4(colour, 1.0f);\n"
 "}\0";
 
+Entity createEntity(Vec2f size, Vec2f position)
+{
+  Entity e = {size, Vec2f{0.0f, 0.0f}, position};
+  return e;
+}
 
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
-  gameState->paddleSize = {20.0f, 100.0f};
-  gameState->ballSize = {20.0f, 20.0f};
-  gameState->paddle1 = loadRect(gameState->paddleSize.x, gameState->paddleSize.y, 0.367f, 0.281f, 0.102f);
-  gameState->paddle2 = loadRect(gameState->paddleSize.x, gameState->paddleSize.y, 0.367f, 0.281f, 0.102f);
-  gameState->paddle1Position = {50.0f, 270.0f};
-  gameState->paddle2Position = {890.0f, 270.0f};
-  gameState->ball = loadRect(gameState->ballSize.x, gameState->ballSize.y, 1.0f, 0.0f, 0.0f);
-  gameState->ballPosition = {960.0f/2.0f, 540.0f/2.0f};
+  Vec2f paddleSize = {20.0f, 100.0f};
+  Vec2f paddle1Position = {50.0f, 270.0f};
+  Vec2f paddle2Position = {890.0f, 270.0f};
+  gameState->paddle1Entity = createEntity(paddleSize, paddle1Position);
+  gameState->paddle2Entity = createEntity(paddleSize, paddle2Position);
+
+  Vec2f ballSize = {20.0f, 20.0f};
+  Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
+  gameState->ballEntity = createEntity(ballSize, ballPosition);
+
+  gameState->paddle1 = loadRect(paddleSize.x, paddleSize.y, 0.367f, 0.281f, 0.102f);
+  gameState->paddle2 = loadRect(paddleSize.x, paddleSize.y, 0.367f, 0.281f, 0.102f);
+  gameState->ball = loadRect(ballSize.x, ballSize.y, 1.0f, 0.0f, 0.0f);
+
   gameState->shader = loadShader(vShader, fShader);
   setProjectionMatrix(platform, gameState->shader);
+
   return gameState;
 }
 
@@ -51,20 +63,32 @@ void gameUpdate(Platform* platform, GameState* gameState)
 {
   if(isKeyPressed(platform, Key::W))
   {
-    gameState->paddle1Position.y -= 5.0f;
-    if(gameState->paddle1Position.y < 0.0f) gameState->paddle1Position.y = 0.0f;
+    gameState->paddle1Entity.velocity.y = -5.0f;
   }
   if(isKeyPressed(platform, Key::S))
   {
-    gameState->paddle1Position.y += 5.0f;
-    if(gameState->paddle1Position.y > 540.0f - 100.0f) gameState->paddle1Position.y = 540.0f - 100.0f;
+    gameState->paddle1Entity.velocity.y = 5.0f;
   }
 
+  //Update paddle and ball similarities
+  //Position += velocity
+  //Screen bounds check
+
+  //Update paddle 1
+  //Update paddle needs position, velocity, size
+  gameState->paddle1Entity.position += gameState->paddle1Entity.velocity;
+  if(gameState->paddle1Entity.position.y < 0.0f) gameState->paddle1Entity.position.y = 0.0f;
+  else if(gameState->paddle1Entity.position.y > 540.0f - 100.0f) gameState->paddle1Entity.position.y = 540.0f - 100.0f;
+  gameState->paddle1Entity.velocity.y = 0.0f;
+
+  //Update paddle 2
+
+  //Update ball
   useShader(gameState->shader);
-  setScreenPosition(gameState, gameState->paddle1Position, gameState->paddleSize);
+  setScreenPosition(gameState, gameState->paddle1Entity.position, gameState->paddle1Entity.size);
   draw(gameState->paddle1);
-  setScreenPosition(gameState, gameState->paddle2Position, gameState->paddleSize);
+  setScreenPosition(gameState, gameState->paddle2Entity.position, gameState->paddle2Entity.size);
   draw(gameState->paddle2);
-  setScreenPosition(gameState, gameState->ballPosition, gameState->ballSize);
+  setScreenPosition(gameState, gameState->ballEntity.position, gameState->ballEntity.size);
   draw(gameState->ball);
 }
