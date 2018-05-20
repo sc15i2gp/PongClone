@@ -1,5 +1,64 @@
 #include "Platform.hpp"
 
+Platform* initPlatform()
+{
+  Platform* platform = new Platform;
+  platform->window = initWindow();
+  platform->keyboard = new Keyboard;
+}
+
+void destroyPlatform(Platform* platform)
+{
+}
+
+
+void pollInput(Platform* platform)
+{
+  SFML_Window* window = platform->window;
+  sf::Event e;
+  while(window->pollEvent(e))
+  {
+    switch(e.type)
+    {
+      case sf::Event::Closed:
+        window->setToClose();
+        break;
+      case sf::Event::KeyPressed:
+        printf("Key pressed\n");
+        break;
+    }
+  }
+}
+
+SFML_Window* initWindow()
+{
+  SFML_Window* window = new SFML_Window(960, 540, "Pong");
+  byte* windowBuffer = new byte[sizeof(sf::Window)];
+  window->init(windowBuffer);
+  LibInit::initGLEW();
+  return window;
+}
+
+void setWindowClearColour(Platform* platform, float colour[3])
+{
+  platform->window->setClearColour(colour);
+}
+
+bool shouldWindowClose(Platform* platform)
+{
+  return platform->window->shouldClose();
+}
+
+void clearWindow(Platform* platform)
+{
+  platform->window->clear();
+}
+
+void updateWindow(Platform* platform)
+{
+  platform->window->update();
+}
+
 GLuint compileShader(const char* shaderString, GLenum shaderType)
 {
   GLuint shaderID = glCreateShader(shaderType);

@@ -29,6 +29,7 @@ public:
   void clear(); //glClear colour bit
   bool pollEvent(sf::Event& event);
   void init(byte* buffer);
+  sf::Window* getWindowReference();
 
 
 private:

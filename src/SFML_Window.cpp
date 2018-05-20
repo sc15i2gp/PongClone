@@ -117,3 +117,8 @@ void SFML_Window::updateWindowViewport()
 {
   glViewport(0, 0, m_width, m_height);
 }
+
+sf::Window* SFML_Window::getWindowReference()
+{
+  return this->m_windowInstance;
+}

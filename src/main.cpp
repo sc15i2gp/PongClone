@@ -11,12 +11,10 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING
 
-//TODO: Draw rectangle
-      //Shader
-        //Compile shader
-        //Link shader
-      //Buffer vertex data
-      //Draw vertex data
+//TODO: Input
+      //All sfml input events
+      //Window events
+      //Keyboard events
 
 const char vShader[] =
 "#version 410 core\n"
@@ -42,43 +40,34 @@ const char fShader[] =
 
 int main(int argc, char** argv)
 {
-  SFML_Window window(960, 540, "Pong");
-  byte* windowBuffer = new byte[sizeof(sf::Window)];
-  window.init(windowBuffer);
-  LibInit::initGLEW();
+  Platform* platform = initPlatform();
+
   float black[] = {0.0f, 0.0f, 0.0f};
-  window.setClearColour(black);
+  setWindowClearColour(platform, black);
 
   GLuint shader = loadShader(vShader, fShader);
   Drawable rect = loadRect();
   Drawable line = loadLine();
 
-  sf::Event e;
   bool running = true;
 
   while(running)
   {
-    while(window.pollEvent(e))
-    {
-      switch(e.type)
-      {
-        case sf::Event::Closed:
-          window.setToClose();
-          break;
-      }
-    }
+    pollInput(platform);
 
-    if(window.shouldClose()) running = false;
+    if(shouldWindowClose(platform)) running = false;
     else
     {
-      window.clear();
+      clearWindow(platform);
+
       glUseProgram(shader);
       draw(rect);
       draw(line);
-      window.update();
+
+      updateWindow(platform);
     }
   }
 
-  delete[] windowBuffer;
+  destroyPlatform(platform);
   return 0;
 }
