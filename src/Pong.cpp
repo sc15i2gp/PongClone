@@ -27,15 +27,24 @@ const char fShader[] =
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
-  gameState->paddle1 = loadRect(20.0f, 100.0f, 0.367f, 0.281f, 0.102f);
-  gameState->paddle2 = loadRect(20.0f, 100.0f, 0.367f, 0.281f, 0.102f);
+  gameState->paddleSize = {20.0f, 100.0f};
+  gameState->ballSize = {20.0f, 20.0f};
+  gameState->paddle1 = loadRect(gameState->paddleSize.x, gameState->paddleSize.y, 0.367f, 0.281f, 0.102f);
+  gameState->paddle2 = loadRect(gameState->paddleSize.x, gameState->paddleSize.y, 0.367f, 0.281f, 0.102f);
   gameState->paddle1Position = {50.0f, 270.0f};
   gameState->paddle2Position = {890.0f, 270.0f};
-  gameState->ball = loadRect(20.0f, 20.0f, 1.0f, 0.0f, 0.0f);
+  gameState->ball = loadRect(gameState->ballSize.x, gameState->ballSize.y, 1.0f, 0.0f, 0.0f);
   gameState->ballPosition = {960.0f/2.0f, 540.0f/2.0f};
   gameState->shader = loadShader(vShader, fShader);
   setProjectionMatrix(platform, gameState->shader);
   return gameState;
+}
+
+void setScreenPosition(GameState* gameState, Vec2f position, Vec2f size)
+{
+  position.x -= (1.0f/2.0f)*size.x;
+  position.y -= (1.0f/2.0f)*size.y;
+  setVec2Uniform(gameState->shader, "position", position);
 }
 
 void gameUpdate(Platform* platform, GameState* gameState)
@@ -52,10 +61,10 @@ void gameUpdate(Platform* platform, GameState* gameState)
   }
 
   useShader(gameState->shader);
-  setVec2Uniform(gameState->shader, "position", gameState->paddle1Position);
+  setScreenPosition(gameState, gameState->paddle1Position, gameState->paddleSize);
   draw(gameState->paddle1);
-  setVec2Uniform(gameState->shader, "position", gameState->paddle2Position);
+  setScreenPosition(gameState, gameState->paddle2Position, gameState->paddleSize);
   draw(gameState->paddle2);
-  setVec2Uniform(gameState->shader, "position", gameState->ballPosition);
+  setScreenPosition(gameState, gameState->ballPosition, gameState->ballSize);
   draw(gameState->ball);
 }

@@ -12,7 +12,7 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Ball
+//TODO: Have positions be center of rectangles
 
 int main(int argc, char** argv)
 {

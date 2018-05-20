@@ -4,6 +4,8 @@
 
 struct GameState
 {
+  Vec2f paddleSize;
+  Vec2f ballSize;
   Vec2f paddle1Position;
   Vec2f paddle2Position;
   Vec2f ballPosition;
