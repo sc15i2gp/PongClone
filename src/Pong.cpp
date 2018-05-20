@@ -79,6 +79,26 @@ void updateBall(Entity& entity)
   entity.position += entity.velocity;
 
   //Screen bounds check
+  if(entity.position.y < 0.0f + 0.5f*entity.size.y)
+  {
+    entity.position.y = 0.0f + 0.5f*entity.size.y;
+    entity.velocity.y = -entity.velocity.y;
+  }
+  else if(entity.position.y > 540.0f - 0.5f*entity.size.y)
+  {
+    entity.position.y = 540.0f - 0.5f*entity.size.y;
+    entity.velocity.y = -entity.velocity.y;
+  }
+  if(entity.position.x < 0.0f + 0.5f*entity.size.x)
+  {
+    entity.position.x = 0.0f + 0.5f*entity.size.x;
+    entity.velocity.x = -entity.velocity.x;
+  }
+  else if(entity.position.x > 960.0f - 0.5f*entity.size.x)
+  {
+    entity.position.x = 960.0f - 0.5f*entity.size.x;
+    entity.velocity.x = -entity.velocity.x;
+  }
 
   //Paddle check
 }
@@ -95,9 +115,9 @@ void gameUpdate(Platform* platform, GameState* gameState)
   }
   if(isKeyPressed(platform, Key::Space))
   {
-    gameState->ballEntity.velocity = {1.0f, 0.0f};
+    gameState->ballEntity.velocity = {5.0f, 5.0f};
   }
-  
+
   updatePaddle(gameState->paddle1Entity);
   updatePaddle(gameState->paddle2Entity);
 

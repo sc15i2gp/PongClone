@@ -12,7 +12,7 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Velocity for paddles + ball
+//TODO: Bounds check for ball
 
 int main(int argc, char** argv)
 {
