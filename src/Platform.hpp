@@ -87,7 +87,7 @@ void updateWindow(Platform* platform);
 /**     Graphics      **/
 
 uint loadShader(const char* vShader, const char* fShader);
-Drawable loadRect(float width, float height);
+Drawable loadRect(float width, float height, float R, float G, float B);
 Drawable loadLine();
 void draw(Drawable d);
 void useShader(uint shader);

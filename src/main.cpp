@@ -12,9 +12,7 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Game update function
-      //Gamestate
-      //Init game
+//TODO: Ball
 
 int main(int argc, char** argv)
 {

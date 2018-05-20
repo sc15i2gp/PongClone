@@ -190,7 +190,7 @@ GLuint bufferVertexData(GLfloat*  positions,  GLsizei positionBufferSize,
   return VAO;
 }
 
-Drawable loadRect(float width, float height)
+Drawable loadRect(float width, float height, float R, float G, float B)
 {
     GLfloat positions[] =
     {
@@ -202,11 +202,12 @@ Drawable loadRect(float width, float height)
 
     GLfloat colours[] =
     {
-      0.367f, 0.281f, 0.102f,
-      0.367f, 0.281f, 0.102f,
-      0.367f, 0.281f, 0.102f,
-      0.367f, 0.281f, 0.102f
+      R, G, B,
+      R, G, B,
+      R, G, B,
+      R, G, B
     };
+    
     GLuint indices[] = {0, 1, 2, 0, 2, 3};
     GLsizei positionBufferSize = sizeof(positions);
     GLsizei colourBufferSize = sizeof(colours);

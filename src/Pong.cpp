@@ -27,8 +27,12 @@ const char fShader[] =
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
-  gameState->rect = loadRect(20.0f, 100.0f);
-  gameState->rectPosition = {50.0f, 270.0f};
+  gameState->paddle1 = loadRect(20.0f, 100.0f, 0.367f, 0.281f, 0.102f);
+  gameState->paddle2 = loadRect(20.0f, 100.0f, 0.367f, 0.281f, 0.102f);
+  gameState->paddle1Position = {50.0f, 270.0f};
+  gameState->paddle2Position = {890.0f, 270.0f};
+  gameState->ball = loadRect(20.0f, 20.0f, 1.0f, 0.0f, 0.0f);
+  gameState->ballPosition = {960.0f/2.0f, 540.0f/2.0f};
   gameState->shader = loadShader(vShader, fShader);
   setProjectionMatrix(platform, gameState->shader);
   return gameState;
@@ -38,16 +42,20 @@ void gameUpdate(Platform* platform, GameState* gameState)
 {
   if(isKeyPressed(platform, Key::W))
   {
-    gameState->rectPosition.y -= 5.0f;
-    if(gameState->rectPosition.y < 0.0f) gameState->rectPosition.y = 0.0f;
+    gameState->paddle1Position.y -= 5.0f;
+    if(gameState->paddle1Position.y < 0.0f) gameState->paddle1Position.y = 0.0f;
   }
   if(isKeyPressed(platform, Key::S))
   {
-    gameState->rectPosition.y += 5.0f;
-    if(gameState->rectPosition.y > 540.0f - 100.0f) gameState->rectPosition.y = 540.0f - 100.0f;
+    gameState->paddle1Position.y += 5.0f;
+    if(gameState->paddle1Position.y > 540.0f - 100.0f) gameState->paddle1Position.y = 540.0f - 100.0f;
   }
 
-  setVec2Uniform(gameState->shader, "position", gameState->rectPosition);
   useShader(gameState->shader);
-  draw(gameState->rect);
+  setVec2Uniform(gameState->shader, "position", gameState->paddle1Position);
+  draw(gameState->paddle1);
+  setVec2Uniform(gameState->shader, "position", gameState->paddle2Position);
+  draw(gameState->paddle2);
+  setVec2Uniform(gameState->shader, "position", gameState->ballPosition);
+  draw(gameState->ball);
 }

@@ -4,8 +4,12 @@
 
 struct GameState
 {
-  Vec2f rectPosition;
-  Drawable rect;
+  Vec2f paddle1Position;
+  Vec2f paddle2Position;
+  Vec2f ballPosition;
+  Drawable paddle1;
+  Drawable paddle2;
+  Drawable ball;
   uint shader;
 };
 
