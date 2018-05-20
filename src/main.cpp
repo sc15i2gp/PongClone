@@ -11,11 +11,6 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING
 
-//TODO: Input
-      //All sfml input events
-      //Window events
-      //Keyboard events
-
 const char vShader[] =
 "#version 410 core\n"
 "layout (location = 0) in vec2 position;\n"
@@ -64,6 +59,7 @@ int main(int argc, char** argv)
       draw(rect);
       draw(line);
 
+      if(isKeyPressed(platform, Key::W)) printf("KEY W PRESSED\n");
       updateWindow(platform);
     }
   }

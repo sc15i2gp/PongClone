@@ -4,13 +4,22 @@ Platform* initPlatform()
 {
   Platform* platform = new Platform;
   platform->window = initWindow();
-  platform->keyboard = new Keyboard;
+  platform->keyboard = initKeyboard();
 }
 
 void destroyPlatform(Platform* platform)
 {
 }
 
+Keyboard* initKeyboard()
+{
+  Keyboard* keyboard = new Keyboard;
+  for(uint i = 0; i < Key::KeyCount; i++)
+  {
+    keyboard->isPressed[i] = false;
+  }
+  return keyboard;
+}
 
 void pollInput(Platform* platform)
 {
@@ -24,10 +33,18 @@ void pollInput(Platform* platform)
         window->setToClose();
         break;
       case sf::Event::KeyPressed:
-        printf("Key pressed\n");
+        platform->keyboard->isPressed[e.key.code] = true;
+        break;
+      case sf::Event::KeyReleased:
+        platform->keyboard->isPressed[e.key.code] = false;
         break;
     }
   }
+}
+
+bool isKeyPressed(Platform* platform, Key key)
+{
+  return platform->keyboard->isPressed[key];
 }
 
 SFML_Window* initWindow()

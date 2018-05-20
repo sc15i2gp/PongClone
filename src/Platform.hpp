@@ -37,8 +37,9 @@ void destroyPlatform(Platform* platform);
 
 /**     Input     **/
 
+Keyboard* initKeyboard();
 void pollInput(Platform* platform);
-
+bool isKeyPressed(Platform* platform, Key key);
 
 
 
