@@ -74,6 +74,15 @@ void updatePaddle(Entity& entity)
   entity.velocity.y = 0.0f;
 }
 
+void updateBall(Entity& entity)
+{
+  entity.position += entity.velocity;
+
+  //Screen bounds check
+
+  //Paddle check
+}
+
 void gameUpdate(Platform* platform, GameState* gameState)
 {
   if(isKeyPressed(platform, Key::W))
@@ -84,11 +93,17 @@ void gameUpdate(Platform* platform, GameState* gameState)
   {
     gameState->paddle1Entity.velocity.y = 5.0f;
   }
-
+  if(isKeyPressed(platform, Key::Space))
+  {
+    gameState->ballEntity.velocity = {1.0f, 0.0f};
+  }
+  
   updatePaddle(gameState->paddle1Entity);
   updatePaddle(gameState->paddle2Entity);
 
   //Update ball
+  updateBall(gameState->ballEntity);
+
   useShader(gameState->shader);
   setScreenPosition(gameState, gameState->paddle1Entity.position, gameState->paddle1Entity.size);
   draw(gameState->paddle1);
