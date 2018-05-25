@@ -74,9 +74,31 @@ void updatePaddle(Entity& entity)
   entity.velocity.y = 0.0f;
 }
 
-void updateBall(Entity& entity)
+void updateBall(GameState* gameState)
 {
-  entity.position += entity.velocity;
+  Entity& entity = gameState->ballEntity;
+  Vec2f p_0 = entity.position;
+  Vec2f p_1 = entity.position + entity.velocity;
+  Vec2f velocity = entity.velocity;
+
+  //Paddle check
+  //Check paddle 1's right wall
+  Entity paddle1 = gameState->paddle1Entity;
+  float a = paddle1.position.x;
+  float t = (a - p_0.x)/(p_1.x - p_0.x);
+  bool collided = t <= 1.0f && t > 0.0f;
+  if(collided)
+  {
+
+    Vec2f wallNormal = {1.0f, 0.0f};
+    Vec2f collisionPoint = p_0 + t * velocity;
+    Vec2f distanceRemaining = p_1 - collisionPoint;
+    Vec2f newPosition = {collisionPoint.x - dot(distanceRemaining, wallNormal), p_1.y};
+    entity.position = newPosition;
+    entity.velocity.x = -entity.velocity.x;
+
+  }
+  else entity.position += entity.velocity;
 
   //Screen bounds check
   if(entity.position.y < 0.0f + 0.5f*entity.size.y)
@@ -99,8 +121,6 @@ void updateBall(Entity& entity)
     entity.position.x = 960.0f - 0.5f*entity.size.x;
     entity.velocity.x = -entity.velocity.x;
   }
-
-  //Paddle check
 }
 
 void gameUpdate(Platform* platform, GameState* gameState)
@@ -115,14 +135,14 @@ void gameUpdate(Platform* platform, GameState* gameState)
   }
   if(isKeyPressed(platform, Key::Space))
   {
-    gameState->ballEntity.velocity = {5.0f, 5.0f};
+    gameState->ballEntity.velocity = {3.0f, 3.0f};
   }
 
   updatePaddle(gameState->paddle1Entity);
   updatePaddle(gameState->paddle2Entity);
 
   //Update ball
-  updateBall(gameState->ballEntity);
+  updateBall(gameState);
 
   useShader(gameState->shader);
   setScreenPosition(gameState, gameState->paddle1Entity.position, gameState->paddle1Entity.size);
