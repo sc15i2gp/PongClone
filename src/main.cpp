@@ -12,8 +12,8 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Ball collision with paddles
-//TODO: Tidy up game update code
+//TODO: Tidy up game code
+      //Separate drawable from entity
 //TODO: Non player paddle follows ball
 
 int main(int argc, char** argv)
