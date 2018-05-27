@@ -13,7 +13,8 @@
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
 //TODO: Tidy up game code
-      //Separate drawable from entity
+      //Add division, projection and normalise to vector functions
+      //Make entities a separate module
 //TODO: Non player paddle follows ball
 
 int main(int argc, char** argv)
