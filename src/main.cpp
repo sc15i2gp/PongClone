@@ -13,7 +13,6 @@
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
 //TODO: Tidy up game code
-      //Add division, projection and normalise to vector functions
       //Make entities a separate module
 //TODO: Non player paddle follows ball
 

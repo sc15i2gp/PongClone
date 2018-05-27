@@ -23,11 +23,6 @@ const char fShader[] =
 "fragColour = vec4(colour, 1.0f);\n"
 "}\0";
 
-Entity createEntity(uint entityType, Vec2f size, Vec2f position)
-{
-  Entity e = {entityType, size, Vec2f{0.0f, 0.0f}, position};
-  return e;
-}
 
 void initEntity(GameState* gameState, uint entityType, Vec2f position, Vec2f size, uint index)
 {
@@ -90,19 +85,24 @@ void setScreenPosition(GameState* gameState, Vec2f position, Vec2f size)
   setVec2Uniform(gameState->shader, "position", position);
 }
 
-void updatePaddle(Entity& entity)
+void updatePaddle(Entity* entity)
 {
-  entity.position += entity.velocity;
-  if(entity.position.y < 0.0f + 0.5f*entity.size.y)
+  Vec2f p = getEntityPosition(entity);
+  Vec2f v = getEntityVelocity(entity);
+  Vec2f s = getEntitySize(entity);
+  p += v;
+  if(p.y < 0.0f + 0.5f*s.y)
   {
-    entity.position.y = 0.0f + 0.5f*entity.size.y;
+    p.y = 0.0f + 0.5f*s.y;
   }
-  else if(entity.position.y > 540.0f - 0.5f*entity.size.y)
+  else if(p.y > 540.0f - 0.5f*s.y)
   {
-    entity.position.y = 540.0f - 0.5f*entity.size.y;
+    p.y = 540.0f - 0.5f*s.y;
   }
+  v.y = 0.0f;
 
-  entity.velocity.y = 0.0f;
+  setEntityPosition(entity, p);
+  setEntityVelocity(entity, v);
 }
 
 bool checkCollisionWithBoundary(float a, float b_0, float b_1, float p_0a, float p_0b,
@@ -127,115 +127,96 @@ bool checkCollisionWithBoundary(float a, float b_0, float b_1, float p_0a, float
 
 void updateBall(GameState* gameState)
 {
-  Entity& entity = gameState->entities[BALL];
-  Vec2f p_0 = entity.position;
-  Vec2f p_1 = entity.position + entity.velocity;
-  Vec2f velocity = entity.velocity;
+  Entity* ball = gameState->entities + BALL;
+  Vec2f ballVelocity = getEntityVelocity(ball);
+  Vec2f ballSize = getEntitySize(ball);
+  Vec2f p_0 = getEntityPosition(ball);
+  Vec2f p_1 = p_0 + ballVelocity;
 
   //Paddle check
   //Check paddle 1's right wall
-  Entity paddle1 = gameState->entities[PADDLE_LEFT];
-  float a = paddle1.position.x + (1.0f/2.0f)*paddle1.size.x + (1.0f/2.0f)*entity.size.x;
-  float b_0 = paddle1.position.y - (1.0f/2.0f)*paddle1.size.y - (1.0f/2.0f)*entity.size.y;
-  float b_1 = paddle1.position.y + (1.0f/2.0f)*paddle1.size.y + (1.0f/2.0f)*entity.size.y;
+  Entity* paddle1 = gameState->entities + PADDLE_LEFT;
+  Vec2f paddle1Size = getEntitySize(paddle1);
+  Vec2f paddle1Position = getEntityPosition(paddle1);
+  float a = paddle1Position.x + (1.0f/2.0f)*paddle1Size.x + (1.0f/2.0f)*ballSize.x;
+  float b_0 = paddle1Position.y - (1.0f/2.0f)*paddle1Size.y - (1.0f/2.0f)*ballSize.y;
+  float b_1 = paddle1Position.y + (1.0f/2.0f)*paddle1Size.y + (1.0f/2.0f)*ballSize.y;
   float tMin = 1.0f;
   bool collided = checkCollisionWithBoundary(a, b_0, b_1, p_0.x, p_0.y, p_1.x, p_1.y, &tMin);
   if(collided)
   {
     Vec2f wallNormal = {1.0f, 0.0f};
-    Vec2f collisionPoint = p_0 + tMin * velocity;
+    Vec2f collisionPoint = p_0 + tMin * ballVelocity;
     Vec2f distanceRemaining = p_1 - collisionPoint;
     Vec2f newPosition = {collisionPoint.x - dot(distanceRemaining, wallNormal), p_1.y};
-    entity.position = newPosition;
-    entity.velocity.x = -entity.velocity.x;
+    p_1 = newPosition;
+    ballVelocity.x = -ballVelocity.x;
   }
-  else entity.position += entity.velocity;
 
   //Screen bounds check
-  if(entity.position.y < 0.0f + 0.5f*entity.size.y)
+  if(p_1.y < 0.0f + 0.5f*ballSize.y)
   {
-    entity.position.y = 0.0f + 0.5f*entity.size.y;
-    entity.velocity.y = -entity.velocity.y;
+    p_1.y = 0.0f + 0.5f*ballSize.y;
+    ballVelocity.y = -ballVelocity.y;
   }
-  else if(entity.position.y > 540.0f - 0.5f*entity.size.y)
+  else if(p_1.y > 540.0f - 0.5f*ballSize.y)
   {
-    entity.position.y = 540.0f - 0.5f*entity.size.y;
-    entity.velocity.y = -entity.velocity.y;
+    p_1.y = 540.0f - 0.5f*ballSize.y;
+    ballVelocity.y = -ballVelocity.y;
   }
-  if(entity.position.x < 0.0f + 0.5f*entity.size.x)
+  if(p_1.x < 0.0f + 0.5f*ballSize.x)
   {
-    entity.position.x = 0.0f + 0.5f*entity.size.x;
-    entity.velocity.x = -entity.velocity.x;
+    p_1.x = 0.0f + 0.5f*ballSize.x;
+    ballVelocity.x = -ballVelocity.x;
   }
-  else if(entity.position.x > 960.0f - 0.5f*entity.size.x)
+  else if(p_1.x > 960.0f - 0.5f*ballSize.x)
   {
-    entity.position.x = 960.0f - 0.5f*entity.size.x;
-    entity.velocity.x = -entity.velocity.x;
+    p_1.x = 960.0f - 0.5f*ballSize.x;
+    ballVelocity.x = -ballVelocity.x;
   }
+  setEntityPosition(ball, p_1);
+  setEntityVelocity(ball, ballVelocity);
 }
 
 void handleControllerInput(Platform* platform, GameState* gameState)
 {
-  Entity& paddle1Entity = gameState->entities[PADDLE_LEFT];
-  Entity& ballEntity = gameState->entities[BALL];
+  Entity* paddle1 = gameState->entities + PADDLE_LEFT;
+  Entity* ball = gameState->entities + BALL;
+  Vec2f paddle1Velocity = getEntityVelocity(paddle1);
+  Vec2f ballVelocity = getEntityVelocity(ball);
   if(isKeyPressed(platform, Key::W))
   {
-    paddle1Entity.velocity.y = -5.0f;
+    paddle1Velocity.y = -5.0f;
   }
   if(isKeyPressed(platform, Key::S))
   {
-    paddle1Entity.velocity.y = 5.0f;
+    paddle1Velocity.y = 5.0f;
   }
   if(isKeyPressed(platform, Key::Space))
   {
-    ballEntity.velocity = {3.0f, 3.0f};
+    setEntityVelocity(ball, Vec2f{3.0f, 3.0f});
   }
+  setEntityVelocity(paddle1, paddle1Velocity);
 }
 
-void updateEntity(GameState* gameState, uint index)
+void drawEntity(GameState* gameState, uint entityIndex, uint drawable)
 {
-  Entity& entity = gameState->entities[index];
-
-  //Move entity and check for collision
-    //Check for collision with outside walls
-      //If collided with outside wall && entity is paddle
-        //Put entity within bounds against wall
-      //Else if collided with outside wall && entity is ball
-        //If wall is top or bottom wall
-          //Calculate ball's new position after collision
-          //Reverse velocity in appropriate direction
-        //Else if wall is left or right wall
-          //Reset ball position and velocity
-    //If entity is ball
-      //Check for collisions with paddles
-        //Use same method for each paddle wall as the outside walls
-  //Draw entity
-}
-
-void updateEntities(GameState* gameState)
-{
-  for(uint i = 0; i < 3; i++)
-  {
-    updateEntity(gameState, i);
-  }
+  Entity* e = gameState->entities + entityIndex;
+  setScreenPosition(gameState, getEntityPosition(e), getEntitySize(e));
+  draw(gameState->drawables[drawable]);
 }
 
 void gameUpdate(Platform* platform, GameState* gameState)
 {
   handleControllerInput(platform, gameState);
 
-  updatePaddle(gameState->entities[PADDLE_LEFT]);
-  updatePaddle(gameState->entities[PADDLE_RIGHT]);
+  updatePaddle(gameState->entities + PADDLE_LEFT);
+  updatePaddle(gameState->entities + PADDLE_RIGHT);
 
   updateBall(gameState);
 
-  //updateEntities(gameState);
-
   useShader(gameState->shader);
-  setScreenPosition(gameState, gameState->entities[PADDLE_LEFT].position, gameState->entities[PADDLE_LEFT].size);
-  draw(gameState->drawables[PADDLE_DRAWABLE]);
-  setScreenPosition(gameState, gameState->entities[PADDLE_RIGHT].position, gameState->entities[PADDLE_RIGHT].size);
-  draw(gameState->drawables[PADDLE_DRAWABLE]);
-  setScreenPosition(gameState, gameState->entities[BALL].position, gameState->entities[BALL].size);
-  draw(gameState->drawables[BALL_DRAWABLE]);
+  drawEntity(gameState, PADDLE_LEFT, PADDLE_DRAWABLE);
+  drawEntity(gameState, PADDLE_RIGHT, PADDLE_DRAWABLE);
+  drawEntity(gameState, BALL, BALL_DRAWABLE);
 }
