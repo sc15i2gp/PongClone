@@ -13,7 +13,14 @@
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
 //TODO: Tidy up game code
-//TODO: Non player paddle follows ball
+
+      //Make it so that collision works with paddle moving opposite direction of ball and top/bottom wall collision
+      //Possible approach:
+          //If paddle will collide with ball
+            //Adjust ball position to move outside of new position
+
+//TODO: Fixed timestep
+//TODO: Goal entity
 
 int main(int argc, char** argv)
 {

@@ -181,63 +181,68 @@ bool checkEntityCollision(GameState* gameState, uint collidingEntity, Vec2f p_0,
     {
       collided = true;
       *collidingWall = wall_1 - wall_0;
-      *collidingNormal = {-collidingWall->y, collidingWall->x};
+      *collidingNormal = normalise(Vec2f{collidingWall->y, -collidingWall->x});
     }
   }
   return collided;
 }
 
-void updateBall(GameState* gameState, uint ball)
+bool isRigidBody(GameState* gameState, uint entity)
 {
-  Vec2f ballVelocity = getEntityVelocity(&(gameState->entities), ball);
-  Vec2f ballSize = getEntitySize(&(gameState->entities), ball);
-  Vec2f p_0 = getEntityPosition(&(gameState->entities), ball);
-  Vec2f p_1 = p_0 + ballVelocity;
+  return isEntityType(&(gameState->entities), entity, ENTITY_PADDLE) ||
+         isEntityType(&(gameState->entities), entity, ENTITY_WALL);
+}
+
+void updateEntity(GameState* gameState, uint entity)
+{
+  Vec2f entityVelocity = getEntityVelocity(&(gameState->entities), entity);
+  Vec2f entitySize = getEntitySize(&(gameState->entities), entity);
+  Vec2f p_0 = getEntityPosition(&(gameState->entities), entity);
+  Vec2f p_1 = p_0 + entityVelocity;
 
   Vec2f collidingNormal;
   Vec2f collidingWall;
-  //Paddle check
-  //Check paddle 1's right wall
   float tMin = 1.0f;
   bool collided = false;
+  uint collidingEntity;
   for(uint i = 0; i < ENTITY_COUNT; i++)
   {
-    if(i != ball)
-    collided = collided || checkEntityCollision(gameState, i, p_0, p_1, ballSize, &collidingWall, &collidingNormal, &tMin);
+    if(i != entity)
+    {
+      bool mayCollide = checkEntityCollision(gameState, i, p_0, p_1, entitySize, &collidingWall, &collidingNormal, &tMin);
+      if(mayCollide) collidingEntity = i;
+      collided = collided || mayCollide;
+    }
   }
   if(collided)
   {
     Vec2f collisionPoint = p_0 + tMin*(p_1 - p_0);
-    Vec2f d = p_1 - collisionPoint;
-    p_1 = collisionPoint + projection(d, collidingWall) - projection(d, collidingNormal);
-    ballVelocity = projection(ballVelocity, collidingWall) - projection(ballVelocity, collidingNormal);
+    if(isEntityType(&(gameState->entities), entity, ENTITY_BALL))
+    {
+      if(isRigidBody(gameState, collidingEntity))
+      {
+        Vec2f d = p_1 - collisionPoint;
+        p_1 = collisionPoint + projection(d, collidingWall) - projection(d, collidingNormal);
+        entityVelocity = projection(entityVelocity, collidingWall) - projection(entityVelocity, collidingNormal);
+      }
+    }
+    else if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE))
+    {
+      if(isRigidBody(gameState, collidingEntity))
+      {
+        p_1 = collisionPoint + collidingNormal;
+      }
+      else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_BALL))
+      {
+        printf("Here\n");
+      }
+    }
   }
 
-  /*
-  //Screen bounds check
-  if(p_1.y < 0.0f + 0.5f*ballSize.y)
-  {
-    p_1.y = 0.0f + 0.5f*ballSize.y;
-    ballVelocity.y = -ballVelocity.y;
-  }
-  else if(p_1.y > 540.0f - 0.5f*ballSize.y)
-  {
-    p_1.y = 540.0f - 0.5f*ballSize.y;
-    ballVelocity.y = -ballVelocity.y;
-  }
-  if(p_1.x < 0.0f + 0.5f*ballSize.x)
-  {
-    p_1.x = 0.0f + 0.5f*ballSize.x;
-    ballVelocity.x = -ballVelocity.x;
-  }
-  else if(p_1.x > 960.0f - 0.5f*ballSize.x)
-  {
-    p_1.x = 960.0f - 0.5f*ballSize.x;
-    ballVelocity.x = -ballVelocity.x;
-  }*/
+  if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
 
-  setEntityPosition(&(gameState->entities), ball, p_1);
-  setEntityVelocity(&(gameState->entities), ball, ballVelocity);
+  setEntityPosition(&(gameState->entities), entity, p_1);
+  setEntityVelocity(&(gameState->entities), entity, entityVelocity);
 }
 
 void handleControllerInput(Platform* platform, GameState* gameState)
@@ -272,10 +277,9 @@ void gameUpdate(Platform* platform, GameState* gameState)
 {
   handleControllerInput(platform, gameState);
 
-  updatePaddle(gameState, PADDLE_LEFT);
-  updatePaddle(gameState, PADDLE_RIGHT);
-
-  updateBall(gameState, BALL);
+  updateEntity(gameState, PADDLE_LEFT);
+  updateEntity(gameState, PADDLE_RIGHT);
+  updateEntity(gameState, BALL);
 
   useShader(gameState->shader);
   drawEntity(gameState, PADDLE_LEFT, PADDLE_DRAWABLE);
