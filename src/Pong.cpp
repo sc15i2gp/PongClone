@@ -153,15 +153,17 @@ bool checkCollisionWithBoundary(Vec2f wall_0, Vec2f wall_1, Vec2f p_0, Vec2f p_1
   return false;
 }
 
-bool checkEntityCollision(GameState* gameState, uint paddle1, Vec2f ballSize, Vec2f p_0, Vec2f p_1,
-                          Vec2f* collidingWall, Vec2f* collidingNormal, float* tMin)
+//Colliding entity is the entity which the moving entity will collide with
+bool checkEntityCollision(GameState* gameState, uint collidingEntity, Vec2f p_0, Vec2f p_1,
+                          Vec2f movingEntitySize, Vec2f* collidingWall, Vec2f* collidingNormal,
+                          float* tMin)
 {
-  Vec2f paddle1Size = getEntitySize(&(gameState->entities), paddle1);
-  Vec2f paddle1Position = getEntityPosition(&(gameState->entities), paddle1);
+  Vec2f collidingEntitySize = getEntitySize(&(gameState->entities), collidingEntity);
+  Vec2f collidingEntityPosition = getEntityPosition(&(gameState->entities), collidingEntity);
 
   bool collided = false;
-  Vec2f topLeftBound = paddle1Position - 0.5f*paddle1Size - 0.5f*ballSize;
-  Vec2f bottomRightBound = paddle1Position + 0.5f*paddle1Size + 0.5f*ballSize;
+  Vec2f topLeftBound = collidingEntityPosition - 0.5f*collidingEntitySize - 0.5f*movingEntitySize;
+  Vec2f bottomRightBound = collidingEntityPosition + 0.5f*collidingEntitySize + 0.5f*movingEntitySize;
   Vec2f wallPoints[] =
   {
     topLeftBound, Vec2f{bottomRightBound.x, topLeftBound.y}, //Top wall
@@ -198,7 +200,7 @@ void updateBall(GameState* gameState, uint ball)
   //Check paddle 1's right wall
   uint paddle1 = PADDLE_LEFT;
   float tMin = 1.0f;
-  bool collided = checkEntityCollision(gameState, paddle1, ballSize, p_0, p_1, &collidingWall, &collidingNormal, &tMin);
+  bool collided = checkEntityCollision(gameState, paddle1, p_0, p_1, ballSize, &collidingWall, &collidingNormal, &tMin);
   if(collided)
   {
     Vec2f collisionPoint = p_0 + tMin*(p_1 - p_0);
