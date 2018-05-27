@@ -198,9 +198,13 @@ void updateBall(GameState* gameState, uint ball)
   Vec2f collidingWall;
   //Paddle check
   //Check paddle 1's right wall
-  uint paddle1 = PADDLE_LEFT;
   float tMin = 1.0f;
-  bool collided = checkEntityCollision(gameState, paddle1, p_0, p_1, ballSize, &collidingWall, &collidingNormal, &tMin);
+  bool collided = false;
+  for(uint i = 0; i < ENTITY_COUNT; i++)
+  {
+    if(i != ball)
+    collided = collided || checkEntityCollision(gameState, i, p_0, p_1, ballSize, &collidingWall, &collidingNormal, &tMin);
+  }
   if(collided)
   {
     Vec2f collisionPoint = p_0 + tMin*(p_1 - p_0);
@@ -209,6 +213,7 @@ void updateBall(GameState* gameState, uint ball)
     ballVelocity = projection(ballVelocity, collidingWall) - projection(ballVelocity, collidingNormal);
   }
 
+  /*
   //Screen bounds check
   if(p_1.y < 0.0f + 0.5f*ballSize.y)
   {
@@ -229,7 +234,8 @@ void updateBall(GameState* gameState, uint ball)
   {
     p_1.x = 960.0f - 0.5f*ballSize.x;
     ballVelocity.x = -ballVelocity.x;
-  }
+  }*/
+
   setEntityPosition(&(gameState->entities), ball, p_1);
   setEntityVelocity(&(gameState->entities), ball, ballVelocity);
 }
