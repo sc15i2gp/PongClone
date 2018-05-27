@@ -1,6 +1,9 @@
 #pragma once
+#include <assert.h>
 #include "Types.hpp"
 #include "Vector.hpp"
+
+#define ENTITY_COUNT 7
 
 #define ENTITY_NULL 0
 #define ENTITY_PADDLE (1 << 0)
@@ -15,11 +18,21 @@ struct Entity
   Vec2f position = {0.0f, 0.0f};
 };
 
-Entity createEntity(uint entityType, Vec2f size, Vec2f position);
-Vec2f getEntityPosition(Entity* entity);
-void setEntityPosition(Entity* entity, Vec2f position);
-Vec2f getEntityVelocity(Entity* entity);
-void setEntityVelocity(Entity* entity, Vec2f velocity);
-Vec2f getEntitySize(Entity* entity);
-void setEntitySize(Entity* entity, Vec2f size);
-bool isEntityType(Entity* entity, uint type);
+struct EntityList
+{
+  uint maxCount = ENTITY_COUNT;
+  Entity entities[ENTITY_COUNT];
+};
+
+Vec2f getEntityPosition(EntityList* list, uint entity);
+void setEntityPosition(EntityList* list, uint entity, Vec2f position);
+Vec2f getEntityVelocity(EntityList* list, uint entity);
+void setEntityVelocity(EntityList* list, uint entity, Vec2f velocity);
+Vec2f getEntitySize(EntityList* list, uint entity);
+void setEntitySize(EntityList* list, uint entity, Vec2f size);
+bool isEntityType(EntityList* list, uint entity, uint type);
+
+Entity* getEntity(EntityList* list, uint index);
+void setEntity(EntityList* list, Entity entity, uint index);
+uint entityCount(EntityList* list);
+void createEntity(EntityList* list, uint entityType, Vec2f size, Vec2f position, uint index);

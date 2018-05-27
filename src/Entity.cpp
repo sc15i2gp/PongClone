@@ -1,46 +1,64 @@
 #include "Entity.hpp"
 
-Entity createEntity(uint entityType, Vec2f size, Vec2f position)
+void createEntity(EntityList* list, uint entityType, Vec2f size, Vec2f position, uint index)
 {
   Entity e = {entityType, size, Vec2f{0.0f, 0.0f}, position};
-  return e;
+  setEntity(list, e, index);
 }
 
-Vec2f getEntityPosition(Entity* entity)
+Vec2f getEntityPosition(EntityList* list, uint entity)
 {
-  return entity->position;
+  return getEntity(list, entity)->position;
 }
 
-void setEntityPosition(Entity* entity, Vec2f position)
+void setEntityPosition(EntityList* list, uint entity, Vec2f position)
 {
-  entity->position = position;
+  getEntity(list, entity)->position = position;
 }
 
-Vec2f getEntityVelocity(Entity* entity)
+Vec2f getEntityVelocity(EntityList* list, uint entity)
 {
-  return entity->velocity;
-}
-
-
-void setEntityVelocity(Entity* entity, Vec2f velocity)
-{
-  entity->velocity = velocity;
+  return getEntity(list, entity)->velocity;
 }
 
 
-Vec2f getEntitySize(Entity* entity)
+void setEntityVelocity(EntityList* list, uint entity, Vec2f velocity)
 {
-  return entity->size;
+  getEntity(list, entity)->velocity = velocity;
 }
 
 
-void setEntitySize(Entity* entity, Vec2f size)
+Vec2f getEntitySize(EntityList* list, uint entity)
 {
-  entity->size = size;
+  return getEntity(list, entity)->size;
 }
 
 
-bool isEntityType(Entity* entity, uint type)
+void setEntitySize(EntityList* list, uint entity, Vec2f size)
 {
-  return entity->type == type;
+  getEntity(list, entity)->size = size;
+}
+
+
+bool isEntityType(EntityList* list, uint entity, uint type)
+{
+  return getEntity(list, entity)->type == type;
+}
+
+
+Entity* getEntity(EntityList* list, uint index)
+{
+  assert(index < ENTITY_COUNT);
+  return list->entities + index;
+}
+
+void setEntity(EntityList* list, Entity entity, uint index)
+{
+  assert(index < ENTITY_COUNT);
+  list->entities[index] = entity;
+}
+
+uint entityCount(EntityList* list)
+{
+  return list->maxCount;
 }

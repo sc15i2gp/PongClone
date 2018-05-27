@@ -1,9 +1,8 @@
 #pragma once
+#include <cstdio>
 #include "Platform.hpp"
 #include "Entity.hpp"
 #include "Vector.hpp"
-
-#define ENTITY_COUNT 7
 
 #define PADDLE_LEFT 0
 #define PADDLE_RIGHT 1
@@ -21,7 +20,7 @@
 
 struct GameState
 {
-  Entity entities[ENTITY_COUNT];
+  EntityList entities;
   Drawable drawables[2];
   uint shader;
 };
