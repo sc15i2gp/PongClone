@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <assert.h>
+#include <IPCommonUtils/Timer.hpp>
 #include "Types.hpp"
 #include "Platform.hpp"
 #include "Pong.hpp"
@@ -12,15 +13,48 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Tidy up game code
+//TODO: Timestep
+      //Use delta time to advance game, not fixed time (may be causing stuttering)
+      //If this doesn't work, move onto next TODO
 
-      //Make it so that collision works with paddle moving opposite direction of ball and top/bottom wall collision
-      //Possible approach:
-          //If paddle will collide with ball
-            //Adjust ball position to move outside of new position
-
-//TODO: Fixed timestep
 //TODO: Goal entity
+      //Goal entity type
+      //Goal entity collision
+      //Reset ball on collision
+      //Have entity hold reference to player entity (the one who gains a point when scoring in that goal)
+
+//TODO: "Round"
+      //Gamestate has isPlaying or isServing etc.
+      //If isServing, start game on space press
+      //Else if isPlaying update entities and if ball collides with goal, reset game
+
+//TODO: Scores
+      //Player 1 and player 2 scores
+      //Render scores
+
+//TODO: Win condition
+      //If a score > win score
+          //Render "Left/right player wins"
+          //Reset game scores
+          //Reset game
+
+//TODO: Audio
+      //Play sound
+      //Audio game data
+
+//TODO: Config
+      //File I/O
+      //Game settings
+      //Config file
+
+//TODO: Pause
+
+//TODO: Main menu
+
+//TODO: Metrics gathering
+      //Frame times
+      //Memory usage (if possible)
+      //Have thread dedicated to transforming logged metrics into graph data
 
 int main(int argc, char** argv)
 {
@@ -31,9 +65,12 @@ int main(int argc, char** argv)
   setWindowClearColour(platform, black);
 
   bool running = true;
+  Timer timer;
+  float dt = 1.0f/60.0f;
 
   while(running)
   {
+    float startTime = timer.getTimeRunning();
     pollInput(platform);
 
     if(shouldWindowClose(platform)) running = false;
@@ -43,6 +80,9 @@ int main(int argc, char** argv)
       gameUpdate(platform, gameState);
       updateWindow(platform);
     }
+    float endTime = timer.getTimeRunning();
+    float timeRemaining = (dt*1000) - (endTime - startTime);
+    if(timeRemaining > 0.0f) sleepFor(timeRemaining);
   }
 
   destroyPlatform(platform);

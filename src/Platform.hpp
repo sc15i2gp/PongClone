@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <unistd.h>
 #include "SFML_Window.hpp"
 #include "Vector.hpp"
 
@@ -47,9 +48,7 @@ struct Platform
 
 Platform* initPlatform();
 void destroyPlatform(Platform* platform);
-
-
-
+void sleepFor(float milliseconds);
 
 
 /**     Memory      **/

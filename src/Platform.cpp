@@ -18,6 +18,12 @@ void destroyPlatform(Platform* platform)
   delete[] memBuffer;
 }
 
+void sleepFor(float milliseconds)
+{
+  uint microseconds = (uint)(milliseconds*1000);
+  assert(usleep(microseconds) == 0);
+}
+
 void printMemBuffer(MemBuffer* buffer)
 {
   printf("MEMBUFFER\n");
@@ -207,7 +213,7 @@ Drawable loadRect(float width, float height, float R, float G, float B)
       R, G, B,
       R, G, B
     };
-    
+
     GLuint indices[] = {0, 1, 2, 0, 2, 3};
     GLsizei positionBufferSize = sizeof(positions);
     GLsizei colourBufferSize = sizeof(colours);
