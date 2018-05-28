@@ -84,31 +84,9 @@ void setScreenPosition(GameState* gameState, Vec2f position, Vec2f size)
   setVec2Uniform(gameState->shader, "position", position);
 }
 
-void updatePaddle(GameState* gameState, uint paddle)
-{
-  Vec2f p = getEntityPosition(&(gameState->entities), paddle);
-  Vec2f v = getEntityVelocity(&(gameState->entities), paddle);
-  Vec2f s = getEntitySize(&(gameState->entities), paddle);
-  p += v;
-  if(p.y < 0.0f + 0.5f*s.y)
-  {
-    p.y = 0.0f + 0.5f*s.y;
-  }
-  else if(p.y > 540.0f - 0.5f*s.y)
-  {
-    p.y = 540.0f - 0.5f*s.y;
-  }
-  v.y = 0.0f;
-
-  setEntityPosition(&(gameState->entities), paddle, p);
-  setEntityVelocity(&(gameState->entities), paddle, v);
-}
-
 bool checkCollisionWithBoundary(Vec2f wall_0, Vec2f wall_1, Vec2f p_0, Vec2f p_1, float* tMin)
 {
-  //NOTE: BROKEN - DOESN'T CHECK WHETHER wall collision point coefficient along wall vector  is between 0.0f and 1.0f
-  //TODO: Fix
-  //Process determined by calculating simultaneous equations results for vector intersection
+  //Process + equations determined by calculating simultaneous equations results for vector intersection
   Vec2f dP = p_1 - p_0;
   Vec2f dW = wall_1 - wall_0;
 
@@ -234,7 +212,10 @@ void updateEntity(GameState* gameState, uint entity)
       }
       else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_BALL))
       {
-        printf("Here\n");
+        //Move ball to edge of paddle
+        Vec2f newBallPosition = getEntityPosition(&(gameState->entities), collidingEntity) +
+                                2*(p_1 - collisionPoint);
+        setEntityPosition(&(gameState->entities), collidingEntity, newBallPosition);
       }
     }
   }
@@ -261,7 +242,7 @@ void handleControllerInput(Platform* platform, GameState* gameState)
   }
   if(isKeyPressed(platform, Key::Space))
   {
-    setEntityVelocity(&(gameState->entities), ball, Vec2f{3.0f, 3.0f});
+    setEntityVelocity(&(gameState->entities), ball, Vec2f{6.0f, 6.0f});
   }
   setEntityVelocity(&(gameState->entities), paddle1, paddle1Velocity);
 }
@@ -277,9 +258,9 @@ void gameUpdate(Platform* platform, GameState* gameState)
 {
   handleControllerInput(platform, gameState);
 
+  updateEntity(gameState, BALL);
   updateEntity(gameState, PADDLE_LEFT);
   updateEntity(gameState, PADDLE_RIGHT);
-  updateEntity(gameState, BALL);
 
   useShader(gameState->shader);
   drawEntity(gameState, PADDLE_LEFT, PADDLE_DRAWABLE);
