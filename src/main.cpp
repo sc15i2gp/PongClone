@@ -19,10 +19,10 @@
       //Reset ball on collision
       //Have entity hold reference to player entity (the one who gains a point when scoring in that goal)
 
-//TODO: "Round"
-      //Gamestate has isPlaying or isServing etc.
-      //If isServing, start game on space press
-      //Else if isPlaying update entities and if ball collides with goal, reset game
+      //TODO: "Round"
+            //Gamestate has isPlaying or isServing etc.
+            //If isServing, start game on space press
+            //Else if isPlaying update entities and if ball collides with goal, reset game
 
 //TODO: Scores
       //Player 1 and player 2 scores

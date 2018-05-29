@@ -9,6 +9,7 @@
 #define ENTITY_PADDLE (1 << 0)
 #define ENTITY_BALL (1 << 1)
 #define ENTITY_WALL (1 << 2)
+#define ENTITY_GOAL (1 << 3)
 
 struct Entity
 {

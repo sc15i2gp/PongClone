@@ -64,8 +64,8 @@ void initWalls(GameState* gameState)
   Vec2f rightWallPosition = {962.0f, 540.0f/2.0f};
   initEntity(gameState, ENTITY_WALL, topWallPosition, horizontalWallSize, TOP_WALL);
   initEntity(gameState, ENTITY_WALL, bottomWallPosition, horizontalWallSize, BOTTOM_WALL);
-  initEntity(gameState, ENTITY_WALL, leftWallPosition, verticalWallSize, LEFT_WALL);
-  initEntity(gameState, ENTITY_WALL, rightWallPosition, verticalWallSize, RIGHT_WALL);
+  initEntity(gameState, ENTITY_GOAL, leftWallPosition, verticalWallSize, LEFT_WALL);
+  initEntity(gameState, ENTITY_GOAL, rightWallPosition, verticalWallSize, RIGHT_WALL);
 }
 
 GameState* initGame(Platform* platform)
@@ -206,6 +206,10 @@ void updateEntity(GameState* gameState, uint entity, float dt)
         Vec2f d = p_1 - collisionPoint;
         p_1 = collisionPoint + projection(d, collidingWall) - projection(d, collidingNormal);
         entityVelocity = projection(entityVelocity, collidingWall) - projection(entityVelocity, collidingNormal);
+      }
+      else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_GOAL))
+      {
+        //TODO: GAME RESET
       }
     }
     else if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE))
