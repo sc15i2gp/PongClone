@@ -15,15 +15,16 @@
 #define PADDLE_DRAWABLE 0
 #define BALL_DRAWABLE 1
 
-//Paddle or ball
-
+#define PI 3.141592653
 
 struct GameState
 {
   EntityList entities;
   Drawable drawables[2];
   uint shader;
+  float ballSpeed;
+  float paddleSpeed;
 };
 
 GameState* initGame(Platform* platform);
-void gameUpdate(Platform* platform, GameState* gameState);
+void gameUpdate(Platform* platform, GameState* gameState, float dt);

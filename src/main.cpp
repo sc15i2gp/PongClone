@@ -13,10 +13,6 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Timestep
-      //Use delta time to advance game, not fixed time (may be causing stuttering)
-      //If this doesn't work, move onto next TODO
-
 //TODO: Goal entity
       //Goal entity type
       //Goal entity collision
@@ -77,7 +73,7 @@ int main(int argc, char** argv)
     else
     {
       clearWindow(platform);
-      gameUpdate(platform, gameState);
+      gameUpdate(platform, gameState, dt);
       updateWindow(platform);
     }
     float endTime = timer.getTimeRunning();

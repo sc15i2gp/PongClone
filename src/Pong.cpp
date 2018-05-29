@@ -23,6 +23,7 @@ const char fShader[] =
 "fragColour = vec4(colour, 1.0f);\n"
 "}\0";
 
+//Old paddle colour = {0.367f, 0.281f, 0.102f}
 
 void initEntity(GameState* gameState, uint entityType, Vec2f position, Vec2f size, uint index)
 {
@@ -37,8 +38,10 @@ void initPaddles(GameState* gameState)
   Vec2f paddle2Position = {890.0f, 270.0f};
   initEntity(gameState, ENTITY_PADDLE, paddle1Position, paddleSize, PADDLE_LEFT);
   initEntity(gameState, ENTITY_PADDLE, paddle2Position, paddleSize, PADDLE_RIGHT);
-  Drawable paddleDrawable = loadRect(paddleSize.x, paddleSize.y, 0.367f, 0.281f, 0.102f);
+  Drawable paddleDrawable = loadRect(paddleSize.x, paddleSize.y, 1.0f, 1.0f, 1.0f);
   gameState->drawables[PADDLE_DRAWABLE] = paddleDrawable;
+  gameState->paddleSpeed = 250.0f;
+
 }
 
 void initBall(GameState* gameState)
@@ -46,8 +49,9 @@ void initBall(GameState* gameState)
   Vec2f ballSize = {20.0f, 20.0f};
   Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
   initEntity(gameState, ENTITY_BALL, ballPosition, ballSize, BALL);
-  Drawable ballDrawable = loadRect(ballSize.x, ballSize.y, 1.0f, 0.0f, 0.0f);
+  Drawable ballDrawable = loadRect(ballSize.x, ballSize.y, 1.0f, 1.0f, 1.0f);
   gameState->drawables[BALL_DRAWABLE] = ballDrawable;
+  gameState->ballSpeed = 500.0f;
 }
 
 void initWalls(GameState* gameState)
@@ -171,9 +175,9 @@ bool isRigidBody(GameState* gameState, uint entity)
          isEntityType(&(gameState->entities), entity, ENTITY_WALL);
 }
 
-void updateEntity(GameState* gameState, uint entity)
+void updateEntity(GameState* gameState, uint entity, float dt)
 {
-  Vec2f entityVelocity = getEntityVelocity(&(gameState->entities), entity);
+  Vec2f entityVelocity = dt*getEntityVelocity(&(gameState->entities), entity);
   Vec2f entitySize = getEntitySize(&(gameState->entities), entity);
   Vec2f p_0 = getEntityPosition(&(gameState->entities), entity);
   Vec2f p_1 = p_0 + entityVelocity;
@@ -223,7 +227,7 @@ void updateEntity(GameState* gameState, uint entity)
   if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
 
   setEntityPosition(&(gameState->entities), entity, p_1);
-  setEntityVelocity(&(gameState->entities), entity, entityVelocity);
+  setEntityVelocity(&(gameState->entities), entity, entityVelocity/dt);
 }
 
 void handleControllerInput(Platform* platform, GameState* gameState)
@@ -234,15 +238,19 @@ void handleControllerInput(Platform* platform, GameState* gameState)
   Vec2f ballVelocity = getEntityVelocity(&(gameState->entities), ball);
   if(isKeyPressed(platform, Key::W))
   {
-    paddle1Velocity.y = -5.0f;
+    paddle1Velocity.y = -gameState->paddleSpeed;
   }
   if(isKeyPressed(platform, Key::S))
   {
-    paddle1Velocity.y = 5.0f;
+    paddle1Velocity.y = gameState->paddleSpeed;
   }
   if(isKeyPressed(platform, Key::Space))
   {
-    setEntityVelocity(&(gameState->entities), ball, Vec2f{6.0f, 6.0f});
+    float theta = PI/4;
+    float x = gameState->ballSpeed * cos(theta);
+    float y = gameState->ballSpeed * sin(theta);
+    Vec2f ballVelocity = {x, y};
+    setEntityVelocity(&(gameState->entities), ball, ballVelocity);
   }
   setEntityVelocity(&(gameState->entities), paddle1, paddle1Velocity);
 }
@@ -254,13 +262,14 @@ void drawEntity(GameState* gameState, uint entityIndex, uint drawable)
   draw(gameState->drawables[drawable]);
 }
 
-void gameUpdate(Platform* platform, GameState* gameState)
+//dt in seconds
+void gameUpdate(Platform* platform, GameState* gameState, float dt)
 {
   handleControllerInput(platform, gameState);
 
-  updateEntity(gameState, BALL);
-  updateEntity(gameState, PADDLE_LEFT);
-  updateEntity(gameState, PADDLE_RIGHT);
+  updateEntity(gameState, BALL, dt);
+  updateEntity(gameState, PADDLE_LEFT, dt);
+  updateEntity(gameState, PADDLE_RIGHT, dt);
 
   useShader(gameState->shader);
   drawEntity(gameState, PADDLE_LEFT, PADDLE_DRAWABLE);
