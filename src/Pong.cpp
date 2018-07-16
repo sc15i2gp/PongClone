@@ -68,6 +68,15 @@ void initWalls(GameState* gameState)
   initEntity(gameState, ENTITY_GOAL, rightWallPosition, verticalWallSize, RIGHT_WALL);
 }
 
+void setInitialConditions(GameState* gameState)
+{
+  	Vec2f paddle1Position = {50.0f, 270.0f};
+  	Vec2f paddle2Position = {890.0f, 270.0f};
+  	Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
+	setEntityPosition(&(gameState->entities), BALL, ballPosition);
+	setEntityVelocity(&(gameState->entities), BALL, Vec2f{0.0f, 0.0f});
+}
+
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
@@ -186,6 +195,7 @@ void updateEntity(GameState* gameState, uint entity, float dt)
   Vec2f collidingWall;
   float tMin = 1.0f;
   bool collided = false;
+  bool shouldReset = false;
   uint collidingEntity;
   for(uint i = 0; i < ENTITY_COUNT; i++)
   {
@@ -209,7 +219,8 @@ void updateEntity(GameState* gameState, uint entity, float dt)
       }
       else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_GOAL))
       {
-        //TODO: GAME RESET
+	setInitialConditions(gameState);
+	shouldReset = true;
       }
     }
     else if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE))
@@ -228,10 +239,13 @@ void updateEntity(GameState* gameState, uint entity, float dt)
     }
   }
 
-  if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
+  	if(!shouldReset)
+  	{
+  		if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
 
-  setEntityPosition(&(gameState->entities), entity, p_1);
-  setEntityVelocity(&(gameState->entities), entity, entityVelocity/dt);
+  		setEntityPosition(&(gameState->entities), entity, p_1);
+  		setEntityVelocity(&(gameState->entities), entity, entityVelocity/dt);
+  	}
 }
 
 void handleControllerInput(Platform* platform, GameState* gameState)
