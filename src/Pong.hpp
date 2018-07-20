@@ -33,6 +33,7 @@ struct GameState
   float ballSpeed;
   float paddleSpeed;
   bool isPlaying;
+  uint goalScored;
 };
 
 GameState* initGame(Platform* platform);

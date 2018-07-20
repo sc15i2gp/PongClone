@@ -96,7 +96,7 @@ GameState* initGame(Platform* platform)
 
   gameState->scores[0] = 0;
   gameState->scores[1] = 0;
-  
+  gameState->goalScored = 0;  
   gameState->isPlaying = false;
 
   return gameState;
@@ -196,7 +196,8 @@ bool isRigidBody(GameState* gameState, uint entity)
          isEntityType(&(gameState->entities), entity, ENTITY_WALL);
 }
 
-void updateEntity(GameState* gameState, uint entity, float dt)
+// Should only calculate the final positions of ball and paddles
+void moveEntity(GameState* gameState, uint entity, float dt)
 {
   Vec2f entityVelocity = dt*getEntityVelocity(&(gameState->entities), entity);
   Vec2f entitySize = getEntitySize(&(gameState->entities), entity);
@@ -207,7 +208,6 @@ void updateEntity(GameState* gameState, uint entity, float dt)
   Vec2f collidingWall;
   float tMin = 1.0f;
   bool collided = false;
-  bool shouldReset = false;
   uint collidingEntity;
   for(uint i = 0; i < ENTITY_COUNT; i++)
   {
@@ -231,13 +231,7 @@ void updateEntity(GameState* gameState, uint entity, float dt)
       }
       else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_GOAL))
       {
-	if(collidingEntity == LEFT_GOAL) gameState->scores[PADDLE_RIGHT]++;
-	else if(collidingEntity == RIGHT_GOAL) gameState->scores[PADDLE_LEFT]++;
-	else assert(false);
-	setInitialConditions(gameState);
-	shouldReset = true;
-
-	printf("Score: { %d | %d }\n", gameState->scores[PADDLE_LEFT], gameState->scores[PADDLE_RIGHT]);
+	      gameState->goalScored = collidingEntity;
       }
     }
     else if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE))
@@ -256,14 +250,10 @@ void updateEntity(GameState* gameState, uint entity, float dt)
     }
   }
 
-  	if(!shouldReset)
-  	{
   		if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
 
   		setEntityPosition(&(gameState->entities), entity, p_1);
   		setEntityVelocity(&(gameState->entities), entity, entityVelocity/dt);
-  	}
-	else gameState->isPlaying = false;
 }
 
 void handlePaddleController(Platform* platform, GameState* gameState, uint entity)
@@ -307,14 +297,32 @@ void drawEntity(GameState* gameState, uint entityIndex, uint drawable)
   draw(gameState->drawables[drawable]);
 }
 
+void handleScore(GameState* gameState)
+{
+	if(gameState->goalScored)
+	{
+		if(gameState->goalScored == LEFT_GOAL) gameState->scores[PADDLE_RIGHT]++;
+		else if(gameState->goalScored == RIGHT_GOAL) gameState->scores[PADDLE_LEFT]++;
+		else assert(false);
+		setInitialConditions(gameState);
+		
+		printf("Score: { %d | %d }\n", gameState->scores[PADDLE_LEFT], gameState->scores[PADDLE_RIGHT]);
+
+		gameState->isPlaying = false;
+		gameState->goalScored = 0;
+	}
+}
+
 //dt in seconds
 void gameUpdate(Platform* platform, GameState* gameState, float dt)
 {
   handleControllerInput(platform, gameState);
 
-  updateEntity(gameState, BALL, dt);
-  updateEntity(gameState, PADDLE_LEFT, dt);
-  updateEntity(gameState, PADDLE_RIGHT, dt);
+  moveEntity(gameState, BALL, dt);
+  moveEntity(gameState, PADDLE_LEFT, dt);
+  moveEntity(gameState, PADDLE_RIGHT, dt);
+
+  handleScore(gameState);
 
   useShader(gameState->shader);
   drawEntity(gameState, PADDLE_LEFT, PADDLE_DRAWABLE);

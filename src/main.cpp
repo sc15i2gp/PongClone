@@ -13,16 +13,12 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Goal entity
-      //Goal entity type
-      //Goal entity collision
-      //Reset ball on collision
-      //Have entity hold reference to player entity (the one who gains a point when scoring in that goal)
+//TODO: Separate out scoring logic from collision code
 
-      //TODO: "Round"
-            //Gamestate has isPlaying or isServing etc.
-            //If isServing, start game on space press
-            //Else if isPlaying update entities and if ball collides with goal, reset game
+//TODO: Tidy up code
+//TODO:		Separate entity data into series of 2 length arrays
+//TODO:		Functions for resetting play, resetting game, loading game for first time etc
+//TODO:		Clean up collision function
 
 int main(int argc, char** argv)
 {
