@@ -64,8 +64,8 @@ void initWalls(GameState* gameState)
   Vec2f rightWallPosition = {962.0f, 540.0f/2.0f};
   initEntity(gameState, ENTITY_WALL, topWallPosition, horizontalWallSize, TOP_WALL);
   initEntity(gameState, ENTITY_WALL, bottomWallPosition, horizontalWallSize, BOTTOM_WALL);
-  initEntity(gameState, ENTITY_GOAL, leftWallPosition, verticalWallSize, LEFT_WALL);
-  initEntity(gameState, ENTITY_GOAL, rightWallPosition, verticalWallSize, RIGHT_WALL);
+  initEntity(gameState, ENTITY_GOAL, leftWallPosition, verticalWallSize, LEFT_GOAL);
+  initEntity(gameState, ENTITY_GOAL, rightWallPosition, verticalWallSize, RIGHT_GOAL);
 }
 
 void setInitialConditions(GameState* gameState)
@@ -87,6 +87,8 @@ GameState* initGame(Platform* platform)
   gameState->shader = loadShader(vShader, fShader);
   setProjectionMatrix(platform, gameState->shader);
 
+  gameState->scores[0] = 0;
+  gameState->scores[1] = 0;
   return gameState;
 }
 
@@ -219,8 +221,13 @@ void updateEntity(GameState* gameState, uint entity, float dt)
       }
       else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_GOAL))
       {
+	if(collidingEntity == LEFT_GOAL) gameState->scores[PADDLE_RIGHT]++;
+	else if(collidingEntity == RIGHT_GOAL) gameState->scores[PADDLE_LEFT]++;
+	else assert(false);
 	setInitialConditions(gameState);
 	shouldReset = true;
+
+	printf("Score: { %d | %d }\n", gameState->scores[PADDLE_LEFT], gameState->scores[PADDLE_RIGHT]);
       }
     }
     else if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE))
