@@ -68,6 +68,12 @@ void initWalls(GameState* gameState)
   initEntity(gameState, ENTITY_GOAL, rightWallPosition, verticalWallSize, RIGHT_GOAL);
 }
 
+void initControllers(GameState* gameState)
+{
+	gameState->controllers[PADDLE_LEFT] = {Key::W, Key::S};
+	gameState->controllers[PADDLE_RIGHT] = {Key::I, Key::K};
+}
+
 void setInitialConditions(GameState* gameState)
 {
   	Vec2f paddle1Position = {50.0f, 270.0f};
@@ -80,6 +86,7 @@ void setInitialConditions(GameState* gameState)
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
+  initControllers(gameState);
   initPaddles(gameState);
   initBall(gameState);
   initWalls(gameState);
@@ -255,20 +262,22 @@ void updateEntity(GameState* gameState, uint entity, float dt)
   	}
 }
 
+void handleController(Platform* platform, GameState* gameState, uint entity)
+{
+	Controls* controller = &(gameState->controllers[entity]);
+	Vec2f entityVelocity = getEntityVelocity(&(gameState->entities), entity);
+	if(isKeyPressed(platform, controller->upKey)) entityVelocity.y = - gameState->paddleSpeed;
+	if(isKeyPressed(platform, controller->downKey)) entityVelocity.y = gameState->paddleSpeed;
+	setEntityVelocity(&(gameState->entities), entity, entityVelocity);
+}
+
 void handleControllerInput(Platform* platform, GameState* gameState)
 {
   uint paddle1 = PADDLE_LEFT;
   uint ball = BALL;
-  Vec2f paddle1Velocity = getEntityVelocity(&(gameState->entities), paddle1);
   Vec2f ballVelocity = getEntityVelocity(&(gameState->entities), ball);
-  if(isKeyPressed(platform, Key::W))
-  {
-    paddle1Velocity.y = -gameState->paddleSpeed;
-  }
-  if(isKeyPressed(platform, Key::S))
-  {
-    paddle1Velocity.y = gameState->paddleSpeed;
-  }
+  handleController(platform, gameState, PADDLE_LEFT);
+  handleController(platform, gameState, PADDLE_RIGHT);
   if(isKeyPressed(platform, Key::Space))
   {
     float theta = PI/4;
@@ -277,7 +286,6 @@ void handleControllerInput(Platform* platform, GameState* gameState)
     Vec2f ballVelocity = {x, y};
     setEntityVelocity(&(gameState->entities), ball, ballVelocity);
   }
-  setEntityVelocity(&(gameState->entities), paddle1, paddle1Velocity);
 }
 
 void drawEntity(GameState* gameState, uint entityIndex, uint drawable)

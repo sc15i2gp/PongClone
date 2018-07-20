@@ -17,11 +17,18 @@
 
 #define PI 3.141592653
 
+struct Controls
+{
+	Key upKey;
+	Key downKey;
+};
+
 struct GameState
 {
   EntityList entities;
   Drawable drawables[2];
   byte scores[2];
+  Controls controllers[2];
   uint shader;
   float ballSpeed;
   float paddleSpeed;
