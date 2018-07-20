@@ -32,6 +32,7 @@ struct GameState
   uint shader;
   float ballSpeed;
   float paddleSpeed;
+  bool isPlaying;
 };
 
 GameState* initGame(Platform* platform);

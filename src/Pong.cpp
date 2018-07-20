@@ -96,6 +96,9 @@ GameState* initGame(Platform* platform)
 
   gameState->scores[0] = 0;
   gameState->scores[1] = 0;
+  
+  gameState->isPlaying = false;
+
   return gameState;
 }
 
@@ -260,9 +263,10 @@ void updateEntity(GameState* gameState, uint entity, float dt)
   		setEntityPosition(&(gameState->entities), entity, p_1);
   		setEntityVelocity(&(gameState->entities), entity, entityVelocity/dt);
   	}
+	else gameState->isPlaying = false;
 }
 
-void handleController(Platform* platform, GameState* gameState, uint entity)
+void handlePaddleController(Platform* platform, GameState* gameState, uint entity)
 {
 	Controls* controller = &(gameState->controllers[entity]);
 	Vec2f entityVelocity = getEntityVelocity(&(gameState->entities), entity);
@@ -271,13 +275,10 @@ void handleController(Platform* platform, GameState* gameState, uint entity)
 	setEntityVelocity(&(gameState->entities), entity, entityVelocity);
 }
 
-void handleControllerInput(Platform* platform, GameState* gameState)
+void handleStartInput(Platform* platform, GameState* gameState)
 {
-  uint paddle1 = PADDLE_LEFT;
   uint ball = BALL;
   Vec2f ballVelocity = getEntityVelocity(&(gameState->entities), ball);
-  handleController(platform, gameState, PADDLE_LEFT);
-  handleController(platform, gameState, PADDLE_RIGHT);
   if(isKeyPressed(platform, Key::Space))
   {
     float theta = PI/4;
@@ -285,7 +286,18 @@ void handleControllerInput(Platform* platform, GameState* gameState)
     float y = gameState->ballSpeed * sin(theta);
     Vec2f ballVelocity = {x, y};
     setEntityVelocity(&(gameState->entities), ball, ballVelocity);
+    gameState->isPlaying = true;
   }
+}
+
+void handleControllerInput(Platform* platform, GameState* gameState)
+{
+	if(!gameState->isPlaying)
+	{
+		handleStartInput(platform, gameState);
+	}
+ 	handlePaddleController(platform, gameState, PADDLE_LEFT);
+  	handlePaddleController(platform, gameState, PADDLE_RIGHT);
 }
 
 void drawEntity(GameState* gameState, uint entityIndex, uint drawable)
