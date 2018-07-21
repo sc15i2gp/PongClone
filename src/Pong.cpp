@@ -92,7 +92,6 @@ void initGameData(GameData* data)
 {
 	data->isPlaying = 0;
 	for(uint i = 0; i < 2; i++) data->scores[i] = 0;
-	data->goalScored = 0;
 }
 
 void initEventQueue(GameEvent* events)
@@ -323,21 +322,6 @@ void drawEntity(uint shader, Drawable drawable, Vec2f position, Vec2f size)
 {
   	setScreenPosition(shader, position, size);
   	draw(drawable);
-}
-
-void handleScore(GameData* gameData, EntityList* entities)
-{
-	if(gameData->goalScored)
-	{
-		if(gameData->goalScored == LEFT_GOAL) gameData->scores[PADDLE_RIGHT]++;
-		else if(gameData->goalScored == RIGHT_GOAL) gameData->scores[PADDLE_LEFT]++;
-		else assert(false);
-		setInitialConditions(entities);
-		
-
-		gameData->isPlaying = false;
-		gameData->goalScored = 0;
-	}
 }
 
 void moveEntities(EntityList* entities, float dt, GameData* gameData, GameEvent* events)

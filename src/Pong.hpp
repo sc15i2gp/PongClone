@@ -52,7 +52,6 @@ struct GameData
 {
 	byte isPlaying;
 	byte scores[2];
-	uint goalScored;
 };
 
 struct GameConfig
