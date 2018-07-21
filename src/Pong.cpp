@@ -95,6 +95,11 @@ void initGameData(GameData* data)
 	data->goalScored = 0;
 }
 
+void initEventQueue(GameEvent* events)
+{
+	for(uint e = 0; e < EVENT_COUNT; e++) events[e].type = EVENT_NULL;
+}
+
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
@@ -108,6 +113,8 @@ GameState* initGame(Platform* platform)
   initGameData(&(gameState->gameData));
   
   initControllers(gameState->controllers);
+
+  initEventQueue(gameState->events);  
   
   return gameState;
 }
@@ -199,8 +206,18 @@ bool isRigidBody(EntityList* entities, uint entity)
          isEntityType(entities, entity, ENTITY_WALL);
 }
 
+void pushEvent(GameEvent* events, uint type, uint data)
+{
+	GameEvent* e = events;
+	uint i = 0;
+	for(; e->type != EVENT_NULL && i < EVENT_COUNT; e++, i++);
+	assert(i < EVENT_COUNT); // Queue should never be completely full at this point
+	if(e->type == EVENT_GOAL_SCORED) e->goal = data;
+	e->type = type;	
+}
+
 // Should only calculate the final positions of ball and paddles
-void moveEntity(EntityList* entities, uint entity, float dt, GameData* gameData)
+void moveEntity(EntityList* entities, uint entity, float dt, GameData* gameData, GameEvent* events)
 {
   Vec2f entityVelocity = dt*getEntityVelocity(entities, entity);
   Vec2f entitySize = getEntitySize(entities, entity);
@@ -231,10 +248,12 @@ void moveEntity(EntityList* entities, uint entity, float dt, GameData* gameData)
         Vec2f d = p_1 - collisionPoint;
         p_1 = collisionPoint + projection(d, collidingWall) - projection(d, collidingNormal);
         entityVelocity = projection(entityVelocity, collidingWall) - projection(entityVelocity, collidingNormal);
+	
+	pushEvent(events, EVENT_BALL_COLLIDE, 0); // Passes 0 as garbage
       }
       else if(isEntityType(entities, collidingEntity, ENTITY_GOAL))
       {
-	      gameData->goalScored = collidingEntity;
+	      pushEvent(events, EVENT_GOAL_SCORED, collidingEntity);
       }
     }
     else if(isEntityType(entities, entity, ENTITY_PADDLE))
@@ -315,18 +334,16 @@ void handleScore(GameData* gameData, EntityList* entities)
 		else assert(false);
 		setInitialConditions(entities);
 		
-		printf("Score: { %d | %d }\n", gameData->scores[PADDLE_LEFT], gameData->scores[PADDLE_RIGHT]);
 
 		gameData->isPlaying = false;
 		gameData->goalScored = 0;
 	}
 }
 
-void moveEntities(EntityList* entities, float dt, GameData* gameData)
+void moveEntities(EntityList* entities, float dt, GameData* gameData, GameEvent* events)
 {
-  	moveEntity(entities, BALL, dt, gameData);
-	moveEntity(entities, PADDLE_LEFT, dt, gameData);
-  	moveEntity(entities, PADDLE_RIGHT, dt, gameData);
+  	moveEntity(entities, BALL, dt, gameData, events);
+	for(uint entity = PADDLE_LEFT; entity <= PADDLE_RIGHT; entity++) moveEntity(entities, entity, dt, gameData, events);
 }
 
 void drawEntities(EntityList* entities, GraphicalData* graphicalData)
@@ -342,15 +359,42 @@ void drawEntities(EntityList* entities, GraphicalData* graphicalData)
 		drawEntity(graphicalData->shader, drawable, position, size);
 	}
 }
-	
+
+void processGoalScore(GameData* gameData, uint goal, EntityList* entities)
+{
+	uint i = (goal == LEFT_GOAL) ? PADDLE_RIGHT : PADDLE_LEFT;
+	gameData->scores[i]++;
+	printf("Score: { %d | %d }\n", gameData->scores[PADDLE_LEFT], gameData->scores[PADDLE_RIGHT]);
+	setInitialConditions(entities);
+	gameData->isPlaying = 0;
+	// Play sound
+}
+
+void processEvents(GameEvent* events, GameData* gameData, EntityList* entities)
+{
+	for(GameEvent* e = events; e->type != EVENT_NULL; e++)
+	{
+		switch(e->type)
+		{
+			case EVENT_GOAL_SCORED:
+				processGoalScore(gameData, e->goal, entities);
+				break;
+			case EVENT_BALL_COLLIDE:
+				// Play sound
+				break;
+		}
+		e->type = EVENT_NULL;
+	}
+}
+
 //dt in seconds
 void gameUpdate(Platform* platform, GameState* gameState, float dt)
 {
   	handleControllerInput(platform, &(gameState->entities), gameState->controllers, &(gameState->gameData), &(gameState->config));
 
-  	moveEntities(&(gameState->entities), dt, &(gameState->gameData));
+  	moveEntities(&(gameState->entities), dt, &(gameState->gameData), gameState->events);
 
-  	handleScore(&(gameState->gameData), &(gameState->entities));
+	processEvents(gameState->events, &(gameState->gameData), &(gameState->entities));
 
   	drawEntities(&(gameState->entities), &(gameState->graphicalData));
 }

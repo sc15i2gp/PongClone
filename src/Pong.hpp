@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <assert.h>
 #include "Platform.hpp"
 #include "Entity.hpp"
 #include "Vector.hpp"
@@ -16,6 +17,24 @@
 #define BALL_DRAWABLE 1
 
 #define PI 3.141592653
+
+#define EVENT_NULL 0
+#define EVENT_GOAL_SCORED 1
+#define EVENT_BALL_COLLIDE 2
+#define EVENT_APPLY_MODIFIER 3
+
+#define EVENT_COUNT 4
+
+struct GameEvent
+{
+	uint type;
+	
+	union
+	{
+		uint goal;
+		uint modifier;
+	};
+};
 
 struct Controls
 {
@@ -51,6 +70,7 @@ struct GameState
   GameData gameData;
   GameConfig config;
   Controls controllers[2];
+  GameEvent events[EVENT_COUNT];
 };
 
 GameState* initGame(Platform* platform);

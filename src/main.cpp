@@ -15,6 +15,10 @@
 
 //TODO: Tidy up code
 
+//TODO: Write function to handle collision events
+//	Will eventually handle sounds playing for some
+//	Handle goal scoring
+
 //TODO: Separate out scoring logic from collision code
 
 //TODO: Properly indent code
