@@ -13,13 +13,12 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
+//TODO: Tidy up code
+
 //TODO: Separate out scoring logic from collision code
 
-//TODO: Tidy up code
-//TODO:		Separate entity data into series of 2 length arrays
-//TODO:		Functions for resetting play, resetting game, loading game for first time etc
-//TODO:		Clean up collision function
-
+//TODO: Properly indent code
+//TODO: Group game code properly
 int main(int argc, char** argv)
 {
   Platform* platform = initPlatform();

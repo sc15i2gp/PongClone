@@ -24,89 +24,92 @@ const char fShader[] =
 "}\0";
 
 //Old paddle colour = {0.367f, 0.281f, 0.102f}
+void setInitialConditions(EntityList* entities)
+{
+  	Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
+	setEntityPosition(entities, BALL, ballPosition);
+	setEntityVelocity(entities, BALL, Vec2f{0.0f, 0.0f});
+}
 
-void initEntity(GameState* gameState, uint entityType, Vec2f position, Vec2f size, uint index)
+void initControllers(Controls* controllers)
+{
+	controllers[PADDLE_LEFT] = {Key::W, Key::S};
+	controllers[PADDLE_RIGHT] = {Key::I, Key::K};
+}
+
+void initGraphicalData(Platform* platform, GraphicalData* graphicalData, Vec2f paddleSize, Vec2f ballSize)
+{
+  	Drawable paddleDrawable = loadRect(paddleSize.x, paddleSize.y, 1.0f, 1.0f, 1.0f);
+  	graphicalData->drawables[PADDLE_DRAWABLE] = paddleDrawable;
+	
+  	Drawable ballDrawable = loadRect(ballSize.x, ballSize.y, 1.0f, 1.0f, 1.0f);
+  	graphicalData->drawables[BALL_DRAWABLE] = ballDrawable;
+	
+	graphicalData->shader = loadShader(vShader, fShader);
+	setProjectionMatrix(platform, graphicalData->shader);
+}
+
+void initEntity(EntityList* entities, uint entityType, Vec2f position, Vec2f size, uint index)
 {
   assert(index < ENTITY_COUNT);
-  createEntity(&(gameState->entities), entityType, size, position, index);
+  createEntity(entities, entityType, size, position, index);
 }
 
-void initPaddles(GameState* gameState)
+void initEntities(EntityList* entities, Vec2f paddleSize, Vec2f ballSize)
 {
-  Vec2f paddleSize = {20.0f, 100.0f};
-  Vec2f paddle1Position = {50.0f, 270.0f};
-  Vec2f paddle2Position = {890.0f, 270.0f};
-  initEntity(gameState, ENTITY_PADDLE, paddle1Position, paddleSize, PADDLE_LEFT);
-  initEntity(gameState, ENTITY_PADDLE, paddle2Position, paddleSize, PADDLE_RIGHT);
-  Drawable paddleDrawable = loadRect(paddleSize.x, paddleSize.y, 1.0f, 1.0f, 1.0f);
-  gameState->drawables[PADDLE_DRAWABLE] = paddleDrawable;
-  gameState->paddleSpeed = 250.0f;
-
-}
-
-void initBall(GameState* gameState)
-{
-  Vec2f ballSize = {20.0f, 20.0f};
-  Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
-  initEntity(gameState, ENTITY_BALL, ballPosition, ballSize, BALL);
-  Drawable ballDrawable = loadRect(ballSize.x, ballSize.y, 1.0f, 1.0f, 1.0f);
-  gameState->drawables[BALL_DRAWABLE] = ballDrawable;
-  gameState->ballSpeed = 500.0f;
-}
-
-void initWalls(GameState* gameState)
-{
-  Vec2f horizontalWallSize = {960.0f, 2.0f};
-  Vec2f verticalWallSize = {2.0f, 540.0f};
-  Vec2f topWallPosition = {960.0f/2.0f, -2.0f};
-  Vec2f bottomWallPosition = {960.0f/2.0f, 542.0f};
-  Vec2f leftWallPosition = {-2.0f, 540.0f/2.0f};
-  Vec2f rightWallPosition = {962.0f, 540.0f/2.0f};
-  initEntity(gameState, ENTITY_WALL, topWallPosition, horizontalWallSize, TOP_WALL);
-  initEntity(gameState, ENTITY_WALL, bottomWallPosition, horizontalWallSize, BOTTOM_WALL);
-  initEntity(gameState, ENTITY_GOAL, leftWallPosition, verticalWallSize, LEFT_GOAL);
-  initEntity(gameState, ENTITY_GOAL, rightWallPosition, verticalWallSize, RIGHT_GOAL);
-}
-
-void initControllers(GameState* gameState)
-{
-	gameState->controllers[PADDLE_LEFT] = {Key::W, Key::S};
-	gameState->controllers[PADDLE_RIGHT] = {Key::I, Key::K};
-}
-
-void setInitialConditions(GameState* gameState)
-{
-  	Vec2f paddle1Position = {50.0f, 270.0f};
-  	Vec2f paddle2Position = {890.0f, 270.0f};
+	//Init paddles
+	Vec2f paddle1Position = {50.0f, 270.0f};
+	Vec2f paddle2Position = {890.0f, 270.0f};
+	initEntity(entities, ENTITY_PADDLE, paddle1Position, paddleSize, PADDLE_LEFT);
+	initEntity(entities, ENTITY_PADDLE, paddle2Position, paddleSize, PADDLE_RIGHT);
+	
+	//Init ball
   	Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
-	setEntityPosition(&(gameState->entities), BALL, ballPosition);
-	setEntityVelocity(&(gameState->entities), BALL, Vec2f{0.0f, 0.0f});
+  	initEntity(entities, ENTITY_BALL, ballPosition, ballSize, BALL);
+	
+	//Init walls
+	Vec2f horizontalWallSize = {960.0f, 2.0f};
+	Vec2f verticalWallSize = {2.0f, 540.0f};
+	Vec2f topWallPosition = {960.0f/2.0f, -2.0f};
+	Vec2f bottomWallPosition = {960.0f/2.0f, 542.0f};
+	Vec2f leftWallPosition = {-2.0f, 540.0f/2.0f};
+	Vec2f rightWallPosition = {962.0f, 540.0f/2.0f};
+	initEntity(entities, ENTITY_WALL, topWallPosition, horizontalWallSize, TOP_WALL);
+	initEntity(entities, ENTITY_WALL, bottomWallPosition, horizontalWallSize, BOTTOM_WALL);
+	initEntity(entities, ENTITY_GOAL, leftWallPosition, verticalWallSize, LEFT_GOAL);
+	initEntity(entities, ENTITY_GOAL, rightWallPosition, verticalWallSize, RIGHT_GOAL);
+}
+
+void initConfiguration(GameConfig* configuration)
+{
+  	configuration->ballSpeed = 500.0f;
+ 	configuration->paddleSpeed = 250.0f;
+  	configuration->paddleSize= {20.0f, 100.0f};
+  	configuration->ballSize = {20.0f, 20.0f};
+}
+
+void initGameData(GameData* data)
+{
+	data->isPlaying = 0;
+	for(uint i = 0; i < 2; i++) data->scores[i] = 0;
+	data->goalScored = 0;
 }
 
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
-  initControllers(gameState);
-  initPaddles(gameState);
-  initBall(gameState);
-  initWalls(gameState);
-
-  gameState->shader = loadShader(vShader, fShader);
-  setProjectionMatrix(platform, gameState->shader);
-
-  gameState->scores[0] = 0;
-  gameState->scores[1] = 0;
-  gameState->goalScored = 0;  
-  gameState->isPlaying = false;
-
+  
+  initConfiguration(&(gameState->config));
+  
+  initGraphicalData(platform, &(gameState->graphicalData), gameState->config.paddleSize, gameState->config.ballSize);
+  
+  initEntities(&(gameState->entities), gameState->config.paddleSize, gameState->config.ballSize);
+  
+  initGameData(&(gameState->gameData));
+  
+  initControllers(gameState->controllers);
+  
   return gameState;
-}
-
-void setScreenPosition(GameState* gameState, Vec2f position, Vec2f size)
-{
-  position.x -= (1.0f/2.0f)*size.x;
-  position.y -= (1.0f/2.0f)*size.y;
-  setVec2Uniform(gameState->shader, "position", position);
 }
 
 bool checkCollisionWithBoundary(Vec2f wall_0, Vec2f wall_1, Vec2f p_0, Vec2f p_1, float* tMin)
@@ -157,12 +160,12 @@ bool checkCollisionWithBoundary(Vec2f wall_0, Vec2f wall_1, Vec2f p_0, Vec2f p_1
 }
 
 //Colliding entity is the entity which the moving entity will collide with
-bool checkEntityCollision(GameState* gameState, uint collidingEntity, Vec2f p_0, Vec2f p_1,
+bool checkEntityCollision(EntityList* entities, uint collidingEntity, Vec2f p_0, Vec2f p_1,
                           Vec2f movingEntitySize, Vec2f* collidingWall, Vec2f* collidingNormal,
                           float* tMin)
 {
-  Vec2f collidingEntitySize = getEntitySize(&(gameState->entities), collidingEntity);
-  Vec2f collidingEntityPosition = getEntityPosition(&(gameState->entities), collidingEntity);
+  Vec2f collidingEntitySize = getEntitySize(entities, collidingEntity);
+  Vec2f collidingEntityPosition = getEntityPosition(entities, collidingEntity);
 
   bool collided = false;
   Vec2f topLeftBound = collidingEntityPosition - 0.5f*collidingEntitySize - 0.5f*movingEntitySize;
@@ -190,18 +193,18 @@ bool checkEntityCollision(GameState* gameState, uint collidingEntity, Vec2f p_0,
   return collided;
 }
 
-bool isRigidBody(GameState* gameState, uint entity)
+bool isRigidBody(EntityList* entities, uint entity)
 {
-  return isEntityType(&(gameState->entities), entity, ENTITY_PADDLE) ||
-         isEntityType(&(gameState->entities), entity, ENTITY_WALL);
+  return isEntityType(entities, entity, ENTITY_PADDLE) ||
+         isEntityType(entities, entity, ENTITY_WALL);
 }
 
 // Should only calculate the final positions of ball and paddles
-void moveEntity(GameState* gameState, uint entity, float dt)
+void moveEntity(EntityList* entities, uint entity, float dt, GameData* gameData)
 {
-  Vec2f entityVelocity = dt*getEntityVelocity(&(gameState->entities), entity);
-  Vec2f entitySize = getEntitySize(&(gameState->entities), entity);
-  Vec2f p_0 = getEntityPosition(&(gameState->entities), entity);
+  Vec2f entityVelocity = dt*getEntityVelocity(entities, entity);
+  Vec2f entitySize = getEntitySize(entities, entity);
+  Vec2f p_0 = getEntityPosition(entities, entity);
   Vec2f p_1 = p_0 + entityVelocity;
 
   Vec2f collidingNormal;
@@ -213,7 +216,7 @@ void moveEntity(GameState* gameState, uint entity, float dt)
   {
     if(i != entity)
     {
-      bool mayCollide = checkEntityCollision(gameState, i, p_0, p_1, entitySize, &collidingWall, &collidingNormal, &tMin);
+      bool mayCollide = checkEntityCollision(entities, i, p_0, p_1, entitySize, &collidingWall, &collidingNormal, &tMin);
       if(mayCollide) collidingEntity = i;
       collided = collided || mayCollide;
     }
@@ -221,111 +224,133 @@ void moveEntity(GameState* gameState, uint entity, float dt)
   if(collided)
   {
     Vec2f collisionPoint = p_0 + tMin*(p_1 - p_0);
-    if(isEntityType(&(gameState->entities), entity, ENTITY_BALL))
+    if(isEntityType(entities, entity, ENTITY_BALL))
     {
-      if(isRigidBody(gameState, collidingEntity))
+      if(isRigidBody(entities, collidingEntity))
       {
         Vec2f d = p_1 - collisionPoint;
         p_1 = collisionPoint + projection(d, collidingWall) - projection(d, collidingNormal);
         entityVelocity = projection(entityVelocity, collidingWall) - projection(entityVelocity, collidingNormal);
       }
-      else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_GOAL))
+      else if(isEntityType(entities, collidingEntity, ENTITY_GOAL))
       {
-	      gameState->goalScored = collidingEntity;
+	      gameData->goalScored = collidingEntity;
       }
     }
-    else if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE))
+    else if(isEntityType(entities, entity, ENTITY_PADDLE))
     {
-      if(isRigidBody(gameState, collidingEntity))
+      if(isRigidBody(entities, collidingEntity))
       {
         p_1 = collisionPoint + collidingNormal;
       }
-      else if(isEntityType(&(gameState->entities), collidingEntity, ENTITY_BALL))
+      else if(isEntityType(entities, collidingEntity, ENTITY_BALL))
       {
         //Move ball to edge of paddle
-        Vec2f newBallPosition = getEntityPosition(&(gameState->entities), collidingEntity) +
+        Vec2f newBallPosition = getEntityPosition(entities, collidingEntity) +
                                 2*(p_1 - collisionPoint);
-        setEntityPosition(&(gameState->entities), collidingEntity, newBallPosition);
+        setEntityPosition(entities, collidingEntity, newBallPosition);
       }
     }
   }
 
-  		if(isEntityType(&(gameState->entities), entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
+  		if(isEntityType(entities, entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
 
-  		setEntityPosition(&(gameState->entities), entity, p_1);
-  		setEntityVelocity(&(gameState->entities), entity, entityVelocity/dt);
+  		setEntityPosition(entities, entity, p_1);
+  		setEntityVelocity(entities, entity, entityVelocity/dt);
 }
 
-void handlePaddleController(Platform* platform, GameState* gameState, uint entity)
+void handlePaddleController(Platform* platform, EntityList* entities, Controls* controllers, uint entity, float paddleSpeed)
 {
-	Controls* controller = &(gameState->controllers[entity]);
-	Vec2f entityVelocity = getEntityVelocity(&(gameState->entities), entity);
-	if(isKeyPressed(platform, controller->upKey)) entityVelocity.y = - gameState->paddleSpeed;
-	if(isKeyPressed(platform, controller->downKey)) entityVelocity.y = gameState->paddleSpeed;
-	setEntityVelocity(&(gameState->entities), entity, entityVelocity);
+	Vec2f entityVelocity = getEntityVelocity(entities, entity);
+	if(isKeyPressed(platform, controllers[entity].upKey)) entityVelocity.y = - paddleSpeed;
+	if(isKeyPressed(platform, controllers[entity].downKey)) entityVelocity.y = paddleSpeed;
+	setEntityVelocity(entities, entity, entityVelocity);
 }
 
-void handleStartInput(Platform* platform, GameState* gameState)
+void handleStartInput(Platform* platform, EntityList* entities, float ballSpeed, byte* isPlaying)
 {
-  uint ball = BALL;
-  Vec2f ballVelocity = getEntityVelocity(&(gameState->entities), ball);
+  Vec2f ballVelocity = getEntityVelocity(entities, BALL);
   if(isKeyPressed(platform, Key::Space))
   {
     float theta = PI/4;
-    float x = gameState->ballSpeed * cos(theta);
-    float y = gameState->ballSpeed * sin(theta);
+    float x = ballSpeed * cos(theta);
+    float y = ballSpeed * sin(theta);
     Vec2f ballVelocity = {x, y};
-    setEntityVelocity(&(gameState->entities), ball, ballVelocity);
-    gameState->isPlaying = true;
+    setEntityVelocity(entities, BALL, ballVelocity);
+    *isPlaying = 1;
   }
 }
 
-void handleControllerInput(Platform* platform, GameState* gameState)
+void handleControllerInput(Platform* platform, EntityList* entities, Controls* controllers, GameData* gameData, GameConfig* gameConfig)
 {
-	if(!gameState->isPlaying)
+	if(!gameData->isPlaying)
 	{
-		handleStartInput(platform, gameState);
+		handleStartInput(platform, entities, gameConfig->ballSpeed, &(gameData->isPlaying));
 	}
- 	handlePaddleController(platform, gameState, PADDLE_LEFT);
-  	handlePaddleController(platform, gameState, PADDLE_RIGHT);
-}
-
-void drawEntity(GameState* gameState, uint entityIndex, uint drawable)
-{
-  setScreenPosition(gameState, getEntityPosition(&(gameState->entities), entityIndex),
-                    getEntitySize(&(gameState->entities), entityIndex));
-  draw(gameState->drawables[drawable]);
-}
-
-void handleScore(GameState* gameState)
-{
-	if(gameState->goalScored)
+	for(uint entity = PADDLE_LEFT; entity <= PADDLE_RIGHT; entity++)
 	{
-		if(gameState->goalScored == LEFT_GOAL) gameState->scores[PADDLE_RIGHT]++;
-		else if(gameState->goalScored == RIGHT_GOAL) gameState->scores[PADDLE_LEFT]++;
+		handlePaddleController(platform, entities, controllers, entity, gameConfig->paddleSpeed);
+	}
+}
+
+void setScreenPosition(uint shader, Vec2f position, Vec2f size)
+{
+  	position.x -= (1.0f/2.0f)*size.x;
+  	position.y -= (1.0f/2.0f)*size.y;
+  	setVec2Uniform(shader, "position", position);
+}
+
+void drawEntity(uint shader, Drawable drawable, Vec2f position, Vec2f size)
+{
+  	setScreenPosition(shader, position, size);
+  	draw(drawable);
+}
+
+void handleScore(GameData* gameData, EntityList* entities)
+{
+	if(gameData->goalScored)
+	{
+		if(gameData->goalScored == LEFT_GOAL) gameData->scores[PADDLE_RIGHT]++;
+		else if(gameData->goalScored == RIGHT_GOAL) gameData->scores[PADDLE_LEFT]++;
 		else assert(false);
-		setInitialConditions(gameState);
+		setInitialConditions(entities);
 		
-		printf("Score: { %d | %d }\n", gameState->scores[PADDLE_LEFT], gameState->scores[PADDLE_RIGHT]);
+		printf("Score: { %d | %d }\n", gameData->scores[PADDLE_LEFT], gameData->scores[PADDLE_RIGHT]);
 
-		gameState->isPlaying = false;
-		gameState->goalScored = 0;
+		gameData->isPlaying = false;
+		gameData->goalScored = 0;
 	}
 }
 
+void moveEntities(EntityList* entities, float dt, GameData* gameData)
+{
+  	moveEntity(entities, BALL, dt, gameData);
+	moveEntity(entities, PADDLE_LEFT, dt, gameData);
+  	moveEntity(entities, PADDLE_RIGHT, dt, gameData);
+}
+
+void drawEntities(EntityList* entities, GraphicalData* graphicalData)
+{
+  	useShader(graphicalData->shader);
+	
+	for(uint entity = PADDLE_LEFT; entity <= BALL; entity++)
+	{
+		Vec2f position = getEntityPosition(entities, entity);
+		Vec2f size = getEntitySize(entities, entity);
+		uint d = (isEntityType(entities, entity, ENTITY_PADDLE)) ? PADDLE_DRAWABLE : BALL_DRAWABLE;
+		Drawable drawable = graphicalData->drawables[d];
+		drawEntity(graphicalData->shader, drawable, position, size);
+	}
+}
+	
 //dt in seconds
 void gameUpdate(Platform* platform, GameState* gameState, float dt)
 {
-  handleControllerInput(platform, gameState);
+  	handleControllerInput(platform, &(gameState->entities), gameState->controllers, &(gameState->gameData), &(gameState->config));
 
-  moveEntity(gameState, BALL, dt);
-  moveEntity(gameState, PADDLE_LEFT, dt);
-  moveEntity(gameState, PADDLE_RIGHT, dt);
+  	moveEntities(&(gameState->entities), dt, &(gameState->gameData));
 
-  handleScore(gameState);
+  	handleScore(&(gameState->gameData), &(gameState->entities));
 
-  useShader(gameState->shader);
-  drawEntity(gameState, PADDLE_LEFT, PADDLE_DRAWABLE);
-  drawEntity(gameState, PADDLE_RIGHT, PADDLE_DRAWABLE);
-  drawEntity(gameState, BALL, BALL_DRAWABLE);
+  	drawEntities(&(gameState->entities), &(gameState->graphicalData));
 }
