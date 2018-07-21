@@ -13,12 +13,8 @@
       //File I/O - NOT INITIALLY IMPLEMENTING
       //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
 
-//TODO: Tidy up code
-
-//TODO: Separate event code
-//	Need function which hashes combination of entity types
-//	Function should exist in entity code
-//	Event code maps that hash code to functions
+//TODO: Make drawables not use paddleSize or ballSize upon initialisation
+//	Make generic rect drawable, could even mean only one drawable is necessary
 
 //TODO: Properly indent code
 //TODO: Group game code properly
