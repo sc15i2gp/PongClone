@@ -13,16 +13,16 @@
 
 struct Entity
 {
-  uint type = ENTITY_NULL;
-  Vec2f size = {0.0f, 0.0f};
-  Vec2f velocity = {0.0f, 0.0f};
-  Vec2f position = {0.0f, 0.0f};
+	uint type = ENTITY_NULL;
+  	Vec2f size = {0.0f, 0.0f};
+  	Vec2f velocity = {0.0f, 0.0f};
+  	Vec2f position = {0.0f, 0.0f};
 };
 
 struct EntityList
 {
-  uint maxCount = ENTITY_COUNT;
-  Entity entities[ENTITY_COUNT];
+  	uint maxCount = ENTITY_COUNT;
+  	Entity entities[ENTITY_COUNT];
 };
 
 Vec2f getEntityPosition(EntityList* list, uint entity);
@@ -37,3 +37,5 @@ Entity* getEntity(EntityList* list, uint index);
 void setEntity(EntityList* list, Entity entity, uint index);
 uint entityCount(EntityList* list);
 void createEntity(EntityList* list, uint entityType, Vec2f size, Vec2f position, uint index);
+
+bool isRigidBody(EntityList*, uint entity);

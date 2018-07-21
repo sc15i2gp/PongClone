@@ -1,28 +1,5 @@
 #include "Pong.hpp"
 
-const char vShader[] =
-"#version 410 core\n"
-"layout (location = 0) in vec2 modelPosition;\n"
-"layout (location = 1) in vec3 inColour;\n"
-"out vec3 colour;\n"
-"uniform mat4 projection;\n"
-"uniform vec2 position;\n"
-"void main()\n"
-"{\n"
-"vec2 actualPosition = modelPosition + position;\n"
-"gl_Position = projection * vec4(actualPosition, 0.0f, 1.0f);\n"
-"colour = inColour;\n"
-"}\0";
-
-const char fShader[] =
-"#version 410 core\n"
-"in vec3 colour;\n"
-"out vec4 fragColour;\n"
-"void main()\n"
-"{\n"
-"fragColour = vec4(colour, 1.0f);\n"
-"}\0";
-
 //Old paddle colour = {0.367f, 0.281f, 0.102f}
 void setInitialConditions(EntityList* entities)
 {
@@ -37,17 +14,6 @@ void initControllers(Controls* controllers)
 	controllers[PADDLE_RIGHT] = {Key::I, Key::K};
 }
 
-void initGraphicalData(Platform* platform, GraphicalData* graphicalData, Vec2f paddleSize, Vec2f ballSize)
-{
-  	Drawable paddleDrawable = loadRect(paddleSize.x, paddleSize.y, 1.0f, 1.0f, 1.0f);
-  	graphicalData->drawables[PADDLE_DRAWABLE] = paddleDrawable;
-	
-  	Drawable ballDrawable = loadRect(ballSize.x, ballSize.y, 1.0f, 1.0f, 1.0f);
-  	graphicalData->drawables[BALL_DRAWABLE] = ballDrawable;
-	
-	graphicalData->shader = loadShader(vShader, fShader);
-	setProjectionMatrix(platform, graphicalData->shader);
-}
 
 void initEntity(EntityList* entities, uint entityType, Vec2f position, Vec2f size, uint index)
 {
@@ -94,11 +60,6 @@ void initGameData(GameData* data)
 	for(uint i = 0; i < 2; i++) data->scores[i] = 0;
 }
 
-void initEventQueue(GameEvent* events)
-{
-	for(uint e = 0; e < EVENT_COUNT; e++) events[e].type = EVENT_NULL;
-}
-
 GameState* initGame(Platform* platform)
 {
   GameState* gameState = (GameState*)allocate(platform, sizeof(GameState));
@@ -113,7 +74,7 @@ GameState* initGame(Platform* platform)
   
   initControllers(gameState->controllers);
 
-  initEventQueue(gameState->events);  
+  initEventQueue(&(gameState->events));  
   
   return gameState;
 }
@@ -199,82 +160,65 @@ bool checkEntityCollision(EntityList* entities, uint collidingEntity, Vec2f p_0,
   return collided;
 }
 
-bool isRigidBody(EntityList* entities, uint entity)
-{
-  return isEntityType(entities, entity, ENTITY_PADDLE) ||
-         isEntityType(entities, entity, ENTITY_WALL);
-}
-
-void pushEvent(GameEvent* events, uint type, uint data)
-{
-	GameEvent* e = events;
-	uint i = 0;
-	for(; e->type != EVENT_NULL && i < EVENT_COUNT; e++, i++);
-	assert(i < EVENT_COUNT); // Queue should never be completely full at this point
-	if(e->type == EVENT_GOAL_SCORED) e->goal = data;
-	e->type = type;	
-}
-
 // Should only calculate the final positions of ball and paddles
-void moveEntity(EntityList* entities, uint entity, float dt, GameData* gameData, GameEvent* events)
+void moveEntity(EntityList* entities, uint entity, float dt, GameData* gameData, EventQueue* events)
 {
-  Vec2f entityVelocity = dt*getEntityVelocity(entities, entity);
-  Vec2f entitySize = getEntitySize(entities, entity);
-  Vec2f p_0 = getEntityPosition(entities, entity);
-  Vec2f p_1 = p_0 + entityVelocity;
+  	Vec2f entityVelocity = dt*getEntityVelocity(entities, entity);
+  	Vec2f entitySize = getEntitySize(entities, entity);
+  	Vec2f p_0 = getEntityPosition(entities, entity);
+  	Vec2f p_1 = p_0 + entityVelocity;
 
-  Vec2f collidingNormal;
-  Vec2f collidingWall;
-  float tMin = 1.0f;
-  bool collided = false;
-  uint collidingEntity;
-  for(uint i = 0; i < ENTITY_COUNT; i++)
-  {
-    if(i != entity)
-    {
-      bool mayCollide = checkEntityCollision(entities, i, p_0, p_1, entitySize, &collidingWall, &collidingNormal, &tMin);
-      if(mayCollide) collidingEntity = i;
-      collided = collided || mayCollide;
-    }
-  }
-  if(collided)
-  {
-    Vec2f collisionPoint = p_0 + tMin*(p_1 - p_0);
-    if(isEntityType(entities, entity, ENTITY_BALL))
-    {
-      if(isRigidBody(entities, collidingEntity))
-      {
-        Vec2f d = p_1 - collisionPoint;
-        p_1 = collisionPoint + projection(d, collidingWall) - projection(d, collidingNormal);
-        entityVelocity = projection(entityVelocity, collidingWall) - projection(entityVelocity, collidingNormal);
+  	Vec2f collidingNormal;
+  	Vec2f collidingWall;
+	float tMin = 1.0f;
+	bool collided = false;
+	uint collidingEntity;
+	for(uint i = 0; i < ENTITY_COUNT; i++)
+	{
+	  	if(i != entity)
+	    	{
+	     	 	bool mayCollide = checkEntityCollision(entities, i, p_0, p_1, entitySize, &collidingWall, &collidingNormal, &tMin);
+	      		if(mayCollide) collidingEntity = i;
+	      		collided = collided || mayCollide;
+	    	}
+	}
+	if(collided)
+	{
+		Vec2f collisionPoint = p_0 + tMin*(p_1 - p_0);
+		if(isEntityType(entities, entity, ENTITY_BALL))
+		{
+			if(isRigidBody(entities, collidingEntity))
+			{
+				Vec2f d = p_1 - collisionPoint;
+				p_1 = collisionPoint + projection(d, collidingWall) - projection(d, collidingNormal);
+				entityVelocity = projection(entityVelocity, collidingWall) - projection(entityVelocity, collidingNormal);
 	
-	pushEvent(events, EVENT_BALL_COLLIDE, 0); // Passes 0 as garbage
-      }
-      else if(isEntityType(entities, collidingEntity, ENTITY_GOAL))
-      {
-	      pushEvent(events, EVENT_GOAL_SCORED, collidingEntity);
-      }
-    }
-    else if(isEntityType(entities, entity, ENTITY_PADDLE))
-    {
-      if(isRigidBody(entities, collidingEntity))
-      {
-        p_1 = collisionPoint + collidingNormal;
-      }
-      else if(isEntityType(entities, collidingEntity, ENTITY_BALL))
-      {
-        //Move ball to edge of paddle
-        Vec2f newBallPosition = getEntityPosition(entities, collidingEntity) +
-                                2*(p_1 - collisionPoint);
-        setEntityPosition(entities, collidingEntity, newBallPosition);
-      }
-    }
-  }
+				pushEvent(events, EVENT_BALL_COLLIDE, 0); // Passes 0 as garbage
+			}
+			else if(isEntityType(entities, collidingEntity, ENTITY_GOAL))
+			{
+				pushEvent(events, EVENT_GOAL_SCORED, collidingEntity);
+			}
+		}
+		else if(isEntityType(entities, entity, ENTITY_PADDLE))
+		{
+			if(isRigidBody(entities, collidingEntity))
+			{
+				p_1 = collisionPoint + collidingNormal;
+			}
+			else if(isEntityType(entities, collidingEntity, ENTITY_BALL))
+			{
+				//Move ball to edge of paddle
+				Vec2f newBallPosition = getEntityPosition(entities, collidingEntity) + 2*(p_1 - collisionPoint);
+				setEntityPosition(entities, collidingEntity, newBallPosition);
+			}
+		}
+	}
 
-  		if(isEntityType(entities, entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
+  	if(isEntityType(entities, entity, ENTITY_PADDLE)) entityVelocity = {0.0f, 0.0f};
 
-  		setEntityPosition(entities, entity, p_1);
-  		setEntityVelocity(entities, entity, entityVelocity/dt);
+  	setEntityPosition(entities, entity, p_1);
+  	setEntityVelocity(entities, entity, entityVelocity/dt);
 }
 
 void handlePaddleController(Platform* platform, EntityList* entities, Controls* controllers, uint entity, float paddleSpeed)
@@ -311,38 +255,11 @@ void handleControllerInput(Platform* platform, EntityList* entities, Controls* c
 	}
 }
 
-void setScreenPosition(uint shader, Vec2f position, Vec2f size)
+void moveEntities(EntityList* entities, float dt, GameData* gameData, EventQueue* events)
 {
-  	position.x -= (1.0f/2.0f)*size.x;
-  	position.y -= (1.0f/2.0f)*size.y;
-  	setVec2Uniform(shader, "position", position);
+	for(uint entity = BALL; entity <= BALL; entity--) moveEntity(entities, entity, dt, gameData, events);
 }
 
-void drawEntity(uint shader, Drawable drawable, Vec2f position, Vec2f size)
-{
-  	setScreenPosition(shader, position, size);
-  	draw(drawable);
-}
-
-void moveEntities(EntityList* entities, float dt, GameData* gameData, GameEvent* events)
-{
-  	moveEntity(entities, BALL, dt, gameData, events);
-	for(uint entity = PADDLE_LEFT; entity <= PADDLE_RIGHT; entity++) moveEntity(entities, entity, dt, gameData, events);
-}
-
-void drawEntities(EntityList* entities, GraphicalData* graphicalData)
-{
-  	useShader(graphicalData->shader);
-	
-	for(uint entity = PADDLE_LEFT; entity <= BALL; entity++)
-	{
-		Vec2f position = getEntityPosition(entities, entity);
-		Vec2f size = getEntitySize(entities, entity);
-		uint d = (isEntityType(entities, entity, ENTITY_PADDLE)) ? PADDLE_DRAWABLE : BALL_DRAWABLE;
-		Drawable drawable = graphicalData->drawables[d];
-		drawEntity(graphicalData->shader, drawable, position, size);
-	}
-}
 
 void processGoalScore(GameData* gameData, uint goal, EntityList* entities)
 {
@@ -354,20 +271,16 @@ void processGoalScore(GameData* gameData, uint goal, EntityList* entities)
 	// Play sound
 }
 
-void processEvents(GameEvent* events, GameData* gameData, EntityList* entities)
+void handleEvent(Event* e, GameData* gameData, EntityList* entities)
 {
-	for(GameEvent* e = events; e->type != EVENT_NULL; e++)
+	switch(e->type)
 	{
-		switch(e->type)
-		{
-			case EVENT_GOAL_SCORED:
-				processGoalScore(gameData, e->goal, entities);
-				break;
-			case EVENT_BALL_COLLIDE:
-				// Play sound
-				break;
-		}
-		e->type = EVENT_NULL;
+		case EVENT_GOAL_SCORED:
+			processGoalScore(gameData, e->goal, entities);
+			break;
+		case EVENT_BALL_COLLIDE:
+			// Play sound
+			break;
 	}
 }
 
@@ -376,9 +289,9 @@ void gameUpdate(Platform* platform, GameState* gameState, float dt)
 {
   	handleControllerInput(platform, &(gameState->entities), gameState->controllers, &(gameState->gameData), &(gameState->config));
 
-  	moveEntities(&(gameState->entities), dt, &(gameState->gameData), gameState->events);
+  	moveEntities(&(gameState->entities), dt, &(gameState->gameData), &(gameState->events));
 
-	processEvents(gameState->events, &(gameState->gameData), &(gameState->entities));
+	handleEvents(&(gameState->events), &(gameState->gameData), &(gameState->entities), handleEvent);
 
   	drawEntities(&(gameState->entities), &(gameState->graphicalData));
 }

@@ -15,6 +15,11 @@
 
 //TODO: Tidy up code
 
+//TODO: Separate event code
+//	Need function which hashes combination of entity types
+//	Function should exist in entity code
+//	Event code maps that hash code to functions
+
 //TODO: Properly indent code
 //TODO: Group game code properly
 
