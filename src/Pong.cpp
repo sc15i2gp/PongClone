@@ -2,7 +2,7 @@
 
 void setInitialConditions(EntityList* entities)
 {
-  	Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
+  	Vec2f ballPosition = {COURT_WIDTH/2.0f, COURT_HEIGHT/2.0f};
 	setEntityPosition(entities, BALL, ballPosition);
 	setEntityVelocity(entities, BALL, Vec2f{0.0f, 0.0f});
 }
@@ -16,22 +16,22 @@ void initEntity(EntityList* entities, uint entityType, Vec2f position, Vec2f siz
 void initEntities(EntityList* entities, Vec2f paddleSize, Vec2f ballSize)
 {
 	//Init paddles
-	Vec2f paddle1Position = {50.0f, 270.0f};
-	Vec2f paddle2Position = {890.0f, 270.0f};
+	Vec2f paddle1Position = {PADDLE_X, COURT_HEIGHT/2.0f};
+	Vec2f paddle2Position = {COURT_WIDTH - PADDLE_X, COURT_HEIGHT/2.0f};
 	initEntity(entities, ENTITY_PADDLE, paddle1Position, paddleSize, PADDLE_LEFT);
 	initEntity(entities, ENTITY_PADDLE, paddle2Position, paddleSize, PADDLE_RIGHT);
 	
 	//Init ball
-  	Vec2f ballPosition = {960.0f/2.0f, 540.0f/2.0f};
+  	Vec2f ballPosition = {COURT_WIDTH/2.0f, COURT_HEIGHT/2.0f};
   	initEntity(entities, ENTITY_BALL, ballPosition, ballSize, BALL);
 	
 	//Init walls
-	Vec2f horizontalWallSize = {960.0f, 2.0f};
-	Vec2f verticalWallSize = {2.0f, 540.0f};
-	Vec2f topWallPosition = {960.0f/2.0f, -2.0f};
-	Vec2f bottomWallPosition = {960.0f/2.0f, 542.0f};
-	Vec2f leftWallPosition = {-2.0f, 540.0f/2.0f};
-	Vec2f rightWallPosition = {962.0f, 540.0f/2.0f};
+	Vec2f horizontalWallSize = {COURT_WIDTH, WALL_WIDTH};
+	Vec2f verticalWallSize = {WALL_WIDTH, COURT_HEIGHT};
+	Vec2f topWallPosition = {COURT_WIDTH/2.0f, -0.5*WALL_WIDTH};
+	Vec2f bottomWallPosition = {COURT_WIDTH/2.0f, COURT_HEIGHT + 0.5f*WALL_WIDTH};
+	Vec2f leftWallPosition = {-0.5f*WALL_WIDTH, COURT_HEIGHT/2.0f};
+	Vec2f rightWallPosition = {COURT_WIDTH + 0.5f*WALL_WIDTH, COURT_HEIGHT/2.0f};
 	initEntity(entities, ENTITY_WALL, topWallPosition, horizontalWallSize, TOP_WALL);
 	initEntity(entities, ENTITY_WALL, bottomWallPosition, horizontalWallSize, BOTTOM_WALL);
 	initEntity(entities, ENTITY_GOAL, leftWallPosition, verticalWallSize, LEFT_GOAL);
@@ -115,7 +115,7 @@ void handlePaddleCollision(EntityList* entities, uint collidingEntity, Vec2f col
 {
 	if(isRigidBody(entities, collidingEntity))
 	{
-		*p_1 = collisionPoint + collidingNormal;
+		*p_1 = collisionPoint + 0.0001f*collidingNormal;
 	}
 	else if(isEntityType(entities, collidingEntity, ENTITY_BALL))
 	{

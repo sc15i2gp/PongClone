@@ -98,7 +98,7 @@ bool isKeyPressed(Platform* platform, Key key)
 SFML_Window* initWindow(Platform* platform)
 {
   byte* windowBuffer = allocate(platform, sizeof(SFML_Window));
-  SFML_Window* window = new (windowBuffer) SFML_Window(960, 540, "Pong");
+  SFML_Window* window = new (windowBuffer) SFML_Window(960, 960, "Pong");
   byte* sfWindowBuffer = allocate(platform, sizeof(sf::Window));
   window->init(sfWindowBuffer);
   LibInit::initGLEW();
@@ -283,10 +283,49 @@ void setProjectionMatrix(Platform* platform, uint shader)
   setMat4Uniform((GLuint)shader, "projection", projection);
 }
 
+void setTranslationBlock(Platform* platform, uint ubo, float xUnitScale, float yUnitScale)
+{
+	float screenWidth = platform->window->getWidth();
+	float screenHeight = platform->window->getHeight();
+
+	glm::mat4 projection = glm::ortho(0.0f, screenWidth, screenHeight, 0.0f);
+	glm::mat4 scale = glm::mat4(0.0f);
+	float scaleX = screenWidth/xUnitScale;
+	float scaleY = screenHeight/yUnitScale;
+	scale[0][0] = scaleX;
+	scale[0][1] = 0.0f;
+	scale[1][0] = 0.0f;
+	scale[1][1] = scaleY;
+	printf("Scale: %.2f %.2f\n", screenHeight, yUnitScale);
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(scale));
+
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	GLenum error = glGetError();
+	if(error != GL_NO_ERROR)
+	{
+		printf("%d error\n", error);
+		assert(false);
+	}
+}
+
 void setVec2Uniform(uint shader, const char* uniform, Vec2f value)
 {
   glUseProgram((GLuint)shader);
   GLint location = uniformLocation(shader, uniform);
   glUniform2f(location, value.x, value.y);
   assert(glGetError() == GL_NO_ERROR);
+}
+
+uint createUniformBuffer(uint size, uint binding)
+{
+	GLuint ubo;
+	glGenBuffers(1, &ubo);
+	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	assert(glGetError() == GL_NO_ERROR);
+	return ubo;
 }

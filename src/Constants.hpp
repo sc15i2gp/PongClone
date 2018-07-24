@@ -8,3 +8,5 @@
 #define LEFT_GOAL 5
 #define RIGHT_GOAL 6
 
+#define COURT_WIDTH 24.0f
+#define COURT_HEIGHT 24.0f

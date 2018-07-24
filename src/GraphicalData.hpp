@@ -9,6 +9,7 @@
 struct GraphicalData
 {
 	uint shader;
+	uint translationUbo;
 	Drawable drawables[2];
 };
 

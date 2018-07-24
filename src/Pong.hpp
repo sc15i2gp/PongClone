@@ -13,6 +13,9 @@
 
 #define PI 3.141592653
 
+#define PADDLE_X 2.5f
+#define WALL_WIDTH 1.0f
+
 struct GameState
 {
   	EntityList entities;

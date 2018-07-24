@@ -92,3 +92,5 @@ void draw(Drawable d);
 void useShader(uint shader);
 void setProjectionMatrix(Platform* platform, uint shader);
 void setVec2Uniform(uint shader, const char* uniform, Vec2f value);
+uint createUniformBuffer(uint size, uint binding);
+void setTranslationBlock(Platform*, uint buffer, float xScale, float yScale);

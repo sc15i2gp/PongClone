@@ -5,22 +5,63 @@
 #include "Platform.hpp"
 #include "Pong.hpp"
 
-//NOTE: Platform provides environment for game to run in
-      //Rendering
-      //Input
-      //Memory
-      //Audio - NOT INITIALLY IMPLEMENTING
-      //File I/O - NOT INITIALLY IMPLEMENTING
-      //Threading - NOT INITIALLY IMPLEMENTING (MIGHT NOT NEED AT ALL)
+//TODO: Add alignment stuff to setTranslationBlock
 
-//TODO: Make drawables not use paddleSize or ballSize upon initialisation
-//	Make generic rect drawable, could even mean only one drawable is necessary
-
-//TODO: Properly indent code
-//TODO: Group game code properly
+//TODO: FIX GOAL SCORING
 
 //TODO: Make game screen size independent
+//	Make sizes and velocities independent of screen size
+//	Make court 24 x 18 units
+//	Make ball 1/2 x 1/2 units
+//	Make paddles 1/2 x 3 units
+//	Make screen size 960 x 720 units
+//	Make paddle position.x be 2.4 units in
+//	Make ball position be game size / 2.0f
+//	Make ball speed be about 13 units
+//	Make paddle speed be 9 units 
 
+//	Only need to change data in init functions
+//	Pixel position = game position * (screen size/game size)
+//	Uniform buffer object store projection matrix and ratio of screen to game size
+//	Update ubo upon window resize
+
+//TODO: Uniform buffer object for projection matrix and screen scale vector
+
+//TODO: Change sizes used in game
+
+//TODO: Window resize event handler
+
+
+
+
+//TODO: Draw net
+//	Draw dotted line
+//	uniform buffer object for projection matrix
+//	line shader (gShader to make net dashed line)
+//	loadLine function
+//	drawNet function
+
+//TODO: Draw scores
+//	FreeType lib used to create glyph texture atlas
+//	Print scores as digit glyphs
+//	(Future) When a player wins, display "LEFT/RIGHT PLAYER WINS"
+//	(Future) Use letter glyphs for menu
+
+//TODO: Menu
+//	Play
+//	Options
+//	Quit
+//	Have selected option render as red text
+//	Wrap selection scroll
+
+//TODO: Audio
+//	OpenAL
+
+//TODO: Particular paddle serves
+
+//TODO: Win condition
+
+//TODO: Modifiers
 int main(int argc, char** argv)
 {
   Platform* platform = initPlatform();
