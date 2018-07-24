@@ -44,7 +44,9 @@ GameState* initGame(Platform* platform)
   
   	initConfig(&(gameState->config));
   
-  	initGraphicalData(platform, &(gameState->graphicalData), gameState->config.paddleSize, gameState->config.ballSize);
+	Vec2f netSize = {0.0f, COURT_HEIGHT};
+
+  	initGraphicalData(platform, &(gameState->graphicalData), gameState->config.paddleSize, gameState->config.ballSize, netSize);
   
   	initEntities(&(gameState->entities), gameState->config.paddleSize, gameState->config.ballSize);
   
@@ -203,4 +205,6 @@ void gameUpdate(Platform* platform, GameState* gameState, float dt)
 	handleEvents(&(gameState->events), &(gameState->gameData), &(gameState->entities), handleEvent);
 
   	drawEntities(&(gameState->entities), &(gameState->graphicalData));
+	Vec2f netPos = {COURT_WIDTH/2.0f, 0.0f};
+	drawNet(&(gameState->graphicalData), netPos);
 }

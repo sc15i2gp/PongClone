@@ -232,18 +232,18 @@ Drawable loadRect(float width, float height, float R, float G, float B)
     	return rect;
 }
 
-Drawable loadLine()
+Drawable loadLine(float x, float y, float R, float G, float B)
 {
   	GLfloat positions[] =
   	{
-    		0.75f, 	0.75f,
-    		0.75f, -0.75f
+    		0.0f, 	0.0f,
+    		x,   	y
   	};
 
  	GLfloat colours[] =
   	{
-    		1.0f, 1.0f, 1.0f,
-    		1.0f, 1.0f, 1.0f
+		R, G, B,
+		R, G, B
   	};
   	GLuint indices[] = {0, 1};
   	GLsizei positionBufferSize = sizeof(positions);

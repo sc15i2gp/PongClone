@@ -87,7 +87,7 @@ bool windowWasResized(Platform*);
 
 uint loadShader(const char* vShader, const char* fShader);
 Drawable loadRect(float width, float height, float R, float G, float B);
-Drawable loadLine();
+Drawable loadLine(float x, float y, float R, float G, float B);
 void draw(Drawable d);
 void useShader(uint shader);
 void setProjectionMatrix(Platform* platform, uint shader);

@@ -5,11 +5,8 @@
 #include "Platform.hpp"
 #include "Pong.hpp"
 
-//TODO: FIX GOAL SCORING
-
 //TODO: Draw net
 //	Draw dotted line
-//	uniform buffer object for projection matrix
 //	line shader (gShader to make net dashed line)
 //	loadLine function
 //	drawNet function
