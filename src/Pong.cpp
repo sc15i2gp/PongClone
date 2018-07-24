@@ -196,6 +196,7 @@ void handleEvent(Event* e, GameData* gameData, EntityList* entities)
 //dt in seconds
 void gameUpdate(Platform* platform, GameState* gameState, float dt)
 {
+	if(windowWasResized(platform)) scaleGraphicalData(platform, &(gameState->graphicalData));
   	handleControllerInput(platform, &(gameState->entities), &(gameState->controllers), &(gameState->gameData), &(gameState->config));
 
   	moveEntities(&(gameState->entities), dt, &(gameState->gameData), &(gameState->events));

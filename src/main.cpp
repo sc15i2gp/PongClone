@@ -5,34 +5,7 @@
 #include "Platform.hpp"
 #include "Pong.hpp"
 
-//TODO: Add alignment stuff to setTranslationBlock
-
 //TODO: FIX GOAL SCORING
-
-//TODO: Make game screen size independent
-//	Make sizes and velocities independent of screen size
-//	Make court 24 x 18 units
-//	Make ball 1/2 x 1/2 units
-//	Make paddles 1/2 x 3 units
-//	Make screen size 960 x 720 units
-//	Make paddle position.x be 2.4 units in
-//	Make ball position be game size / 2.0f
-//	Make ball speed be about 13 units
-//	Make paddle speed be 9 units 
-
-//	Only need to change data in init functions
-//	Pixel position = game position * (screen size/game size)
-//	Uniform buffer object store projection matrix and ratio of screen to game size
-//	Update ubo upon window resize
-
-//TODO: Uniform buffer object for projection matrix and screen scale vector
-
-//TODO: Change sizes used in game
-
-//TODO: Window resize event handler
-
-
-
 
 //TODO: Draw net
 //	Draw dotted line

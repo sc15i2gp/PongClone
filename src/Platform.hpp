@@ -13,31 +13,31 @@ typedef sf::Keyboard::Key Key;
 
 struct Keyboard
 {
-  bool isPressed[Key::KeyCount];
+  	bool isPressed[Key::KeyCount];
 };
 
 
 struct Drawable
 {
-  GLuint vao;
-  GLsizei indexCount;
-  GLenum drawMode;
+  	GLuint vao;
+  	GLsizei indexCount;
+  	GLenum drawMode;
 };
 
 
 struct MemBuffer
 {
-  uint bufferSize = 0;
-  uint inUse = 0;
-  byte* buffer = NULL;
+  	uint bufferSize = 0;
+  	uint inUse = 0;
+  	byte* buffer = NULL;
 };
 
 
 struct Platform
 {
-  MemBuffer* memBuffer;
-  SFML_Window* window;
-  Keyboard* keyboard;
+	MemBuffer* memBuffer;
+  	SFML_Window* window;
+  	Keyboard* keyboard;
 };
 
 
@@ -78,7 +78,7 @@ void setWindowClearColour(Platform* platform, float colour[3]);
 bool shouldWindowClose(Platform* platform);
 void clearWindow(Platform* platform);
 void updateWindow(Platform* platform);
-
+bool windowWasResized(Platform*);
 
 
 

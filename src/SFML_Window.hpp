@@ -23,6 +23,7 @@ public:
   int getWidth();
   int getHeight();
   bool shouldClose();
+  bool wasResized();
 
   //SFML specific window functions
   void update(); //Calls sf::Window display()
@@ -36,11 +37,12 @@ private:
   void updateWindowViewport();
   sf::ContextSettings createContextSettings();
 
-  bool        m_shouldClose;
-  int         m_width;
-  int         m_height;
-  float       m_clearColour[3];
-  const char* m_label;
+  bool        	m_shouldClose;
+  bool		m_wasResized;
+  int         	m_width;
+  int         	m_height;
+  float       	m_clearColour[3];
+  const char* 	m_label;
 
   //SFML specific window details
   sf::Window* m_windowInstance;

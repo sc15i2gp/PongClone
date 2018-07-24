@@ -42,6 +42,11 @@ void initGraphicalData(Platform* platform, GraphicalData* graphicalData, Vec2f p
 	setTranslationBlock(platform, graphicalData->translationUbo, COURT_WIDTH, COURT_HEIGHT);
 }
 
+void scaleGraphicalData(Platform* platform, GraphicalData* graphicalData)
+{
+	setTranslationBlock(platform, graphicalData->translationUbo, COURT_WIDTH, COURT_HEIGHT);
+}
+
 void setScreenPosition(uint shader, Vec2f position, Vec2f size)
 {
 	position -= (0.5f*size);

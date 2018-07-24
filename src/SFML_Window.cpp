@@ -4,9 +4,8 @@ SFML_Window::SFML_Window( int width, int height,
                           const char* label):   m_width(width),
                                                 m_height(height),
                                                 m_label(label),
-                                                m_shouldClose(false)
-
-
+                                                m_shouldClose(false),
+						m_wasResized(false)
 {
 }
 
@@ -27,6 +26,7 @@ void SFML_Window::resize(int width, int height)
   m_width = width;
   m_height = height;
   updateWindowViewport();
+  m_wasResized = true;
 }
 
 
@@ -58,6 +58,13 @@ bool SFML_Window::shouldClose()
 }
 
 
+
+bool SFML_Window::wasResized()
+{
+	bool ret = m_wasResized;
+	if(m_wasResized) m_wasResized = false;
+	return ret;
+}
 
 //SFML specific functions
 void SFML_Window::init(byte* buffer)

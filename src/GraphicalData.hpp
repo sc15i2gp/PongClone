@@ -14,4 +14,5 @@ struct GraphicalData
 };
 
 void initGraphicalData(Platform* platform, GraphicalData* graphicalData, Vec2f paddleSize, Vec2f ballSize);
+void scaleGraphicalData(Platform*, GraphicalData*);
 void drawEntities(EntityList* entities, GraphicalData* graphicalData);
