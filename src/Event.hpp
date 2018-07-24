@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdio>
 #include <assert.h>
 
 #include "Types.hpp"

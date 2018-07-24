@@ -14,6 +14,7 @@ void printScore(GameData* data)
 void scoreGoal(GameData* data, uint scorer)
 {
 	data->scores[scorer]++;
+	printScore(data);
 }
 
 void startPlay(GameData* data)

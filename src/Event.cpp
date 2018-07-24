@@ -11,8 +11,8 @@ void pushEvent(EventQueue* eventQueue, uint type, uint data)
 	uint i = 0;
 	for(; e->type != EVENT_NULL && i < EVENT_COUNT; e++, i++);
 	assert(i < EVENT_COUNT); // Queue should never be completely full at this point
+	e->type = type;
 	if(e->type == EVENT_GOAL_SCORED) e->goal = data;
-	e->type = type;	
 }
 
 void handleEvents(EventQueue* eventQueue, GameData* gameData, EntityList* entities, EventHandler handleEvent)

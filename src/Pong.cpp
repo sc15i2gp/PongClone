@@ -72,7 +72,6 @@ void serve(EntityList* entities, GameData* gameData, GameConfig* config)
 	float y = config->ballSpeed * sin(theta);
 	Vec2f ballVelocity = {x, y};
 	setEntityVelocity(entities, BALL, ballVelocity);
-	printScore(gameData);
 	startPlay(gameData);
 }
 
