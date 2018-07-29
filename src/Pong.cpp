@@ -204,7 +204,7 @@ void gameUpdate(Platform* platform, GameState* gameState, float dt)
 
 	handleEvents(&(gameState->events), &(gameState->gameData), &(gameState->entities), handleEvent);
 
-  	drawEntities(&(gameState->entities), &(gameState->graphicalData));
 	Vec2f netPos = {COURT_WIDTH/2.0f, 0.0f};
 	drawNet(&(gameState->graphicalData), netPos);
+  	drawEntities(&(gameState->entities), &(gameState->graphicalData));
 }

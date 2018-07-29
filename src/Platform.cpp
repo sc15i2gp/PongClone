@@ -182,26 +182,57 @@ uint loadShader(const char* vShader, const char* fShader)
   	return (uint)shader;
 }
 
-GLuint bufferVertexData(GLfloat*  positions,  GLsizei positionBufferSize,
-                        GLfloat*  colours,    GLsizei colourBufferSize,
-                        GLuint*   indices,    GLsizei indexBufferSize)
+GLuint bufferVertexData(GLfloat* 	positions, 	GLsizei positionBufferSize,
+			GLuint* 	indices, 	GLsizei indexBufferSize)
 {
-  	GLuint VBO[2], VAO, EBO;
-  	glGenVertexArrays(1, &VAO);
-  	glGenBuffers(2, VBO);
-  	glGenBuffers(1, &EBO);
-  	glBindVertexArray(VAO);
-  	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+	GLuint VAO, VBO, EBO;
+  	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glGenVertexArrays(1, &VAO);
+	
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
   	glBufferData(GL_ARRAY_BUFFER, positionBufferSize, positions, GL_STATIC_DRAW);
   	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), (GLvoid*)0);
   	glEnableVertexAttribArray(0);
-  	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+  	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, indices, GL_STATIC_DRAW);
+	return VAO;
+}
+
+GLuint bufferColourData(GLfloat* colours, GLsizei colourBufferSize)
+{
+	GLuint VBO;
+  	glGenBuffers(1, &VBO);
+  	glBindBuffer(GL_ARRAY_BUFFER, VBO);
   	glBufferData(GL_ARRAY_BUFFER, colourBufferSize, colours, GL_STATIC_DRAW);
   	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), (GLvoid*)0);
   	glEnableVertexAttribArray(1);
-  	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, indices, GL_STATIC_DRAW);
-  	return VAO;
+	return VBO;
+}
+
+GLuint bufferTexCoords(GLfloat* coords, GLsizei coordsBufferSize)
+{
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, coordsBufferSize, coords, GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(2);
+	return VBO;
+}
+
+GLuint bufferVertexData(GLfloat*  positions,  GLsizei positionBufferSize,
+                        GLfloat*  colours,    GLsizei colourBufferSize,
+                        GLuint*   indices,    GLsizei indexBufferSize,
+			bool isColourData)
+{
+  	GLuint VAO = bufferVertexData(positions, positionBufferSize, indices, indexBufferSize);
+	if(isColourData) bufferColourData(colours, colourBufferSize); 
+	else bufferTexCoords(colours, colourBufferSize);
+	return VAO;
 }
 
 Drawable loadRect(float width, float height, float R, float G, float B)
@@ -226,7 +257,7 @@ Drawable loadRect(float width, float height, float R, float G, float B)
     	GLsizei positionBufferSize = sizeof(positions);
     	GLsizei colourBufferSize = sizeof(colours);
     	GLsizei indexBufferSize = sizeof(indices);
-    	GLuint vao = bufferVertexData(positions, positionBufferSize, colours, colourBufferSize, indices, indexBufferSize);
+    	GLuint vao = bufferVertexData(positions, positionBufferSize, colours, colourBufferSize, indices, indexBufferSize, true);
     	GLsizei indexCount = 6;
     	Drawable rect = {vao, indexCount, GL_TRIANGLES};
     	return rect;
@@ -240,16 +271,13 @@ Drawable loadLine(float x, float y, float R, float G, float B)
     		x,   	y
   	};
 
- 	GLfloat colours[] =
-  	{
-		R, G, B,
-		R, G, B
-  	};
+ 	GLfloat texCoords[] = {0.0f, 1.0f};
+
   	GLuint indices[] = {0, 1};
   	GLsizei positionBufferSize = sizeof(positions);
-  	GLsizei colourBufferSize = sizeof(colours);
+  	GLsizei texCoordBufferSize = sizeof(texCoords);
   	GLsizei indexBufferSize = sizeof(indices);
-  	GLuint vao = bufferVertexData(positions, positionBufferSize, colours, colourBufferSize, indices, indexBufferSize);
+  	GLuint vao = bufferVertexData(positions, positionBufferSize, texCoords, texCoordBufferSize, indices, indexBufferSize, false);
   	GLsizei indexCount = 2;
   	Drawable line = {vao, indexCount, GL_LINES};
   	return line;
@@ -264,6 +292,12 @@ void draw(Drawable d)
 void useShader(uint shader)
 {
   	glUseProgram((GLuint)shader);
+}
+
+
+void bindTexture(uint texture)
+{
+	glBindTexture(GL_TEXTURE_1D, texture);
 }
 
 GLint uniformLocation(GLuint shader,
@@ -323,14 +357,33 @@ void setVec2Uniform(uint shader, const char* uniform, Vec2f value)
   	assert(glGetError() == GL_NO_ERROR);
 }
 
+void setLineWidth(float width)
+{
+	glLineWidth(width);
+}
+
 uint createUniformBuffer(uint size, uint binding)
 {
 	GLuint ubo;
 	glGenBuffers(1, &ubo);
 	glBindBuffer(GL_UNIFORM_BUFFER, ubo);
 	glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding, ubo);
+	glBindBuffer(GL_UNIFORM_BUFFER, binding);
 	assert(glGetError() == GL_NO_ERROR);
 	return ubo;
+}
+
+uint create1DTexture(float* textureData, uint length)
+{
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_1D, texture);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RED, length, 0, GL_RED, GL_FLOAT, textureData);
+	glBindTexture(GL_TEXTURE_1D, texture);
+	return texture;
 }

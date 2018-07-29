@@ -14,6 +14,7 @@ struct GraphicalData
 {
 	uint shaders[2];
 	uint translationUbo;
+	uint netTexture;
 	Drawable drawables[3];
 };
 
